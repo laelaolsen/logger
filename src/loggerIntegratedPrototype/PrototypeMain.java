@@ -32,6 +32,10 @@ import javafx.geometry.Pos;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * <p> Title: Logger Integrated Prototype. </p>
@@ -48,6 +52,7 @@ public class PrototypeMain extends Application {
     File defectFile = new File("src\\defect_database");
     File reportFile = new File("src\\report_database");
     File projectFile = new File("src\\project_database");
+    File secretKeyFile = new File("src\\secretKey");
 	
 	// Helper functions ------------------------------------------
     
@@ -224,6 +229,10 @@ public class PrototypeMain extends Application {
     
     // Currently logged in user's user-name ("testUser1", etc.)
     String currentUsername;
+    
+    // Used for password encryption CHECK
+    String algorithm;
+    String key;
 
 	@SuppressWarnings("unchecked")
 	public void start(Stage primaryStage) throws Exception {
@@ -235,6 +244,17 @@ public class PrototypeMain extends Application {
 		
 		double scrollPaneWidth = 700;
 		double scrollPaneHeight = 300;
+		
+		// Encryption cipher is set up CHECK
+		
+		algorithm = "AES";
+        try
+        {
+        	BufferedReader databaseReader = new BufferedReader(new FileReader(secretKeyFile));
+        	key = databaseReader.readLine();
+        	databaseReader.close();
+        }
+        catch(IOException e) {e.printStackTrace();}
 		
 		// Log In Interface -------------------------------------------------------------
 		
@@ -625,7 +645,21 @@ public class PrototypeMain extends Application {
             		{   		
 		
             			BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(credentialFile, true));
-            			databaseWriter.write(usernameTextField.getText() + "," + passwordTextField.getText() + "," + currentUserType);
+            			
+            			//CHECK encrypt password at this line
+            			SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
+            	        Cipher cipher = Cipher.getInstance(algorithm);
+            	        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+            	        byte[] valueBytes = passwordTextField.getText().getBytes();
+            	        int blockSize = cipher.getBlockSize();
+            	        
+            	        byte[] paddedBytes = new byte[blockSize * ((valueBytes.length + blockSize - 1) / blockSize)];
+            	        System.arraycopy(valueBytes, 0, paddedBytes, 0, valueBytes.length); 
+            	        byte[] encryptedValue = cipher.doFinal(paddedBytes);
+            	        String encryptedMessage = Base64.getEncoder().encodeToString(encryptedValue);
+            			
+            			
+            			databaseWriter.write(usernameTextField.getText() + "," + encryptedMessage + "," + currentUserType);
             			databaseWriter.newLine();
 	            		databaseWriter.close();
             		}
@@ -654,8 +688,17 @@ public class PrototypeMain extends Application {
                 {
                 	BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));               	
                 	while ((line = databaseReader.readLine()) != null) {
-						if(usernameTextField.getText().equals(line.split(",")[0]) && 
-								passwordTextField.getText().equals(line.split(",")[1]) && 
+                		//CHECK
+                		SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
+                        Cipher cipher = Cipher.getInstance(algorithm);
+                        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+                        byte[] decodedValue = Base64.getDecoder().decode(line.split(",")[1]);
+                        byte[] decryptedValue = cipher.doFinal(decodedValue);
+                        String plainText = (new String(decryptedValue));
+                        plainText = plainText.trim();
+                        
+            		    if(usernameTextField.getText().equals(line.split(",")[0]) && 
+								passwordTextField.getText().equals(new String(plainText)) && 
 								(userTypeGroup.getSelectedToggle().equals(employeeSelect) && 
 								line.split(",")[2].equals("Employee") || 
 								userTypeGroup.getSelectedToggle().equals(managerSelect) && 
@@ -669,7 +712,7 @@ public class PrototypeMain extends Application {
 					}
                 	databaseReader.close();
                 }
-                catch(IOException e) {e.printStackTrace();}
+                catch(Exception e) {e.printStackTrace();}
             	
             	// Upon successful login, scene is changed and access is granted
             	if(validUser)
@@ -777,7 +820,7 @@ public class PrototypeMain extends Application {
             		eaProject.getSelectionModel().select(((Label)newValue.getChildren().get(1)).getText());
             		eaLCS.getSelectionModel().select(((Label)newValue.getChildren().get(2)).getText());
             		eaEC.getSelectionModel().select(((Label)newValue.getChildren().get(3)).getText());
-            		System.out.println(((Label)newValue.getChildren().get(4)).getText().split("-")[0]);
+            		
             		eaStart.setValue(LocalDate.of(Integer.parseInt(((Label)newValue.getChildren().get(4)).getText().split("-")[0]), Integer.parseInt(((Label)newValue.getChildren().get(4)).getText().split("-")[1]), Integer.parseInt(((Label)newValue.getChildren().get(4)).getText().split("-")[2])));
             		eaEnd.setValue(LocalDate.of(Integer.parseInt(((Label)newValue.getChildren().get(5)).getText().split("-")[0]), Integer.parseInt(((Label)newValue.getChildren().get(5)).getText().split("-")[1]), Integer.parseInt(((Label)newValue.getChildren().get(5)).getText().split("-")[2])));
             		eaDescription.setText(((Label)newValue.getChildren().get(6)).getText());
