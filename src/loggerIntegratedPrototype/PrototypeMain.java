@@ -8,7 +8,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -33,6 +36,7 @@ import javafx.geometry.Pos;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.Optional;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -222,6 +226,47 @@ public class PrototypeMain extends Application {
 	
 	}
 	
+	// Updates the account list view according to the database
+		public ObservableList<GridPane> accountRefreshListView()
+		{
+			ObservableList<GridPane> accountList = FXCollections.observableArrayList();
+			try {
+				BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));
+				String currentLine;
+		    	
+				GridPane accountColumnHeaders = new GridPane();
+				accountColumnHeaders.setHgap(50);
+				accountColumnHeaders.setPadding(new Insets(5,5,5,5));
+				Label accountNameHeaderLabel = new Label("Username");
+				accountNameHeaderLabel.setMinWidth(100);
+				Label accountTypeHeaderLabel = new Label("Account Type");
+				accountColumnHeaders.getChildren().addAll(accountNameHeaderLabel, accountTypeHeaderLabel);
+				GridPane.setConstraints(accountNameHeaderLabel, 0, 0);
+				GridPane.setConstraints(accountTypeHeaderLabel, 1, 0);
+				accountList.add(accountColumnHeaders);
+				
+		    	while((currentLine = databaseReader.readLine()) != null) 
+		    	{
+		    		GridPane GridPaneToAdd = new GridPane();
+		    		GridPaneToAdd.setHgap(50);
+		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
+		    		Label accountNameLabel = new Label(currentLine.split(",", 3)[0]);
+		    		accountNameLabel.setMinWidth(100);
+		    		Label accountTypeLabel = new Label(currentLine.split(",", 3)[2]);
+		    		GridPaneToAdd.getChildren().addAll(accountNameLabel, accountTypeLabel);
+		    		GridPane.setConstraints(accountNameLabel, 0, 0);
+		    		GridPane.setConstraints(accountTypeLabel, 1, 0);
+		    		
+		    		accountList.add(GridPaneToAdd);
+		    	}
+		    	
+		    	databaseReader.close();
+			}
+			catch(IOException e) {e.printStackTrace();}
+			return accountList;
+		
+		}
+	
 	// Global variables ------------------------------------------------------
 	
 	// Currently logged in user's type ("Employee", etc.)
@@ -233,6 +278,9 @@ public class PrototypeMain extends Application {
     // Used for password encryption CHECK
     String algorithm;
     String key;
+    
+    // Currently selected account in the Account Interface
+    String accountName;
 
 	@SuppressWarnings("unchecked")
 	public void start(Stage primaryStage) throws Exception {
@@ -573,7 +621,61 @@ public class PrototypeMain extends Application {
         projectBox.getChildren().addAll(new Label(), loggerTitle4, projectScrollPane, projectGridPane, projectButtons);
      
         //Account Interface -------------------------------------------------------------
+        VBox accountBox = new VBox(20);
+        accountBox.setAlignment(Pos.TOP_CENTER);
+        Scene accountScene = new Scene(accountBox, screenWidth, screenHeight);
         
+        Label loggerTitle5 = new Label("Logger");
+        loggerTitle5.setFont(new Font(loggerTitle5.getFont().toString(), 30));
+        
+        // Contains the ListView of accounts
+        ScrollPane accountScrollPane = new ScrollPane();
+        accountScrollPane.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+        
+        // Contains the list of accounts
+        ListView<GridPane> accountListView = new ListView<GridPane>();
+        accountListView.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+
+        accountListView.setItems(accountRefreshListView());
+        
+        accountScrollPane.setContent(accountListView);
+        
+        accountName = "";
+        Button deleteAccount = new Button("Delete Account");;
+        
+     // Changes the input fields when a project from the list is selected
+        accountListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<GridPane>() {
+            @Override
+            public void changed(ObservableValue<? extends GridPane> observable, GridPane oldValue, GridPane newValue) {
+                
+            	if(newValue != null && !((Label)newValue.getChildren().get(0)).getText().equals("Username"))
+            	{
+            		accountName = ((Label)newValue.getChildren().get(0)).getText();
+            		deleteAccount.setStyle("");
+            	}
+            	// Nothing is shown if the user selects nothing or selects the list headers
+            	else if(newValue != null &&((Label)newValue.getChildren().get(0)).getText().equals("Username"))
+		        {
+            		accountName = "";
+            		deleteAccount.setStyle("");
+		        }
+            }
+        });
+        
+     // Buttons for the account interface (Handlers below)
+        HBox accountButtons = new HBox(40);
+        accountButtons.setAlignment(Pos.CENTER);
+        
+        Button accountBackButton = new Button("Back");
+        
+        HBox.setMargin(deleteAccount, new Insets(10));
+        HBox.setMargin(accountBackButton, new Insets(10));
+        
+        accountButtons.getChildren().addAll(deleteAccount, accountBackButton);
+        
+        accountBox.getChildren().addAll(new Label(), loggerTitle5, accountScrollPane, accountButtons);
+        
+
         
         // Button EventHandlers -------------------------------------------------------------
         EventHandler<ActionEvent> signUpButtonEventHandler = new EventHandler<ActionEvent>() {
@@ -913,7 +1015,7 @@ public class PrototypeMain extends Application {
                 		eaInvalid = true;
                 	}
                 	// Checks if the start time is after the end time
-                	if(eaStart.getValue().isAfter(eaEnd.getValue()))
+                	if(eaStart.getValue() != null && eaEnd.getValue() != null && eaStart.getValue().isAfter(eaEnd.getValue()))
                 	{
                 		eaStart.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
                 		eaEnd.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
@@ -1156,11 +1258,95 @@ public class PrototypeMain extends Application {
         EventHandler<ActionEvent> accountsEventHandler = new EventHandler<ActionEvent>() {
         	@Override
             public void handle(ActionEvent event) {
+        		primaryStage.setScene(accountScene);
+        		accountListView.getSelectionModel().clearSelection();
+        		deleteAccount.setStyle("");
         		     		
         	}
         };
         accounts.setOnAction(accountsEventHandler);
+        
+        
+     // Handles deleting an account
+	    EventHandler<ActionEvent> deleteAccountEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+	    		
+    			// Deletes the account from credentials_database
+	    		try {
+	    	        BufferedReader file = new BufferedReader(new FileReader(credentialFile));
+	    	        StringBuffer inputBuffer = new StringBuffer();
+	    	        String line;
+
+	    	     // Reads through credentials_database and removes the given account
+	    	        while ((line = file.readLine()) != null) {
+	    	            if((!line.split(",")[0].equals(accountName)))
+	    	            {
+	    	            	inputBuffer.append(line);
+	    	            	inputBuffer.append('\n');
+	    	            }
+	    	        }
+	    	        file.close();
+
+	    	        FileOutputStream fileOut = new FileOutputStream(credentialFile);
+	    	        fileOut.write(inputBuffer.toString().getBytes());
+	    	        fileOut.close();
+	    	        
+	    	        accountListView.setItems(accountRefreshListView());
+	    	    } 
+	    		catch (Exception e) {e.printStackTrace();}
+	    		
+	    		// Deletes the account's effort activities from effort_database
+	    		try {
+	    	        BufferedReader file = new BufferedReader(new FileReader(effortFile));
+	    	        StringBuffer inputBuffer = new StringBuffer();
+	    	        String line;
+
+	    	     // Reads through credentials_database and removes the given account
+	    	        while ((line = file.readLine()) != null) {
+	    	            if((!line.split(",")[0].equals(accountName)))
+	    	            {
+	    	            	inputBuffer.append(line);
+	    	            	inputBuffer.append('\n');
+	    	            }
+	    	        }
+	    	        file.close();
+
+	    	        FileOutputStream fileOut = new FileOutputStream(effortFile);
+	    	        fileOut.write(inputBuffer.toString().getBytes());
+	    	        fileOut.close();
+	    	        
+	    	        eaListView.setItems(eaRefreshListView());
+	    	    } 
+	    		catch (Exception e) {e.printStackTrace();}
+    		}
+	    	
+	    };
      
+	 // Handles confirming the deletion of an account
+        EventHandler<ActionEvent> confirmDeleteAccountEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+		    	if(!accountName.equals(currentUsername) && !accountName.equals(""))
+		    	{
+		    		Alert alert = new Alert(AlertType.CONFIRMATION);
+		    		alert.setTitle("Confirmation Dialog");
+		    		alert.setHeaderText("Account Deletion Confirmation");
+		    		alert.setContentText("Are you sure that you want to permanently delete this account?");
+	
+		    		Optional<ButtonType> result = alert.showAndWait();
+		    		if (result.get() == ButtonType.OK){
+		    		    deleteAccountEventHandler.handle(new ActionEvent());
+		    		}
+		    	}
+		    	else
+		    	{
+		    		deleteAccount.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+		    	}
+	    	}   	
+	    };
+	    deleteAccount.setOnAction(confirmDeleteAccountEventHandler);
+	    
      // Handles returning to the option select Scene 
 	    EventHandler<ActionEvent> backEventHandler = new EventHandler<ActionEvent>() {
 	    	@Override
@@ -1170,6 +1356,7 @@ public class PrototypeMain extends Application {
 	    };
 	    eaBackButton.setOnAction(backEventHandler);
 	    projectBackButton.setOnAction(backEventHandler);
+	    accountBackButton.setOnAction(backEventHandler);
    
     }
 	
