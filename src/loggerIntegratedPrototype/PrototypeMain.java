@@ -185,6 +185,56 @@ public class PrototypeMain extends Application {
 		return eaList;
 	}
 	
+	// Updates the report list view according to the database
+		public ObservableList<GridPane> reportRefreshListView()
+		{
+			ObservableList<GridPane> reportList = FXCollections.observableArrayList();
+			try {
+				BufferedReader databaseReader = new BufferedReader(new FileReader(reportFile));
+				String currentLine;
+		    	
+				GridPane reportColumnHeaders = new GridPane();
+				reportColumnHeaders.setHgap(50);
+				reportColumnHeaders.setPadding(new Insets(5,5,5,5));
+				Label reportNameHeaderLabel = new Label("Report Name");
+				reportNameHeaderLabel.setMinWidth(100);
+				Label reportDateGeneratedHeaderLabel = new Label("Date Generated");
+				reportDateGeneratedHeaderLabel.setMinWidth(100);
+				Label reportTimeGeneratedHeaderLabel = new Label("Time Generated");
+				reportTimeGeneratedHeaderLabel.setMinWidth(100);
+				reportColumnHeaders.getChildren().addAll(reportNameHeaderLabel, reportDateGeneratedHeaderLabel, reportTimeGeneratedHeaderLabel);
+				GridPane.setConstraints(reportNameHeaderLabel, 0, 0);
+				GridPane.setConstraints(reportDateGeneratedHeaderLabel, 1, 0);
+				GridPane.setConstraints(reportTimeGeneratedHeaderLabel, 2, 0);
+				reportList.add(reportColumnHeaders);
+				
+		    	while((currentLine = databaseReader.readLine()) != null) 
+		    	{
+		    		GridPane GridPaneToAdd = new GridPane();
+		    		GridPaneToAdd.setHgap(50);
+		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
+		    		Label reportNameLabel = new Label(currentLine.split(",")[0]);
+		    		reportNameLabel.setMinWidth(100);
+		    		Label reportDateGeneratedLabel = new Label(currentLine.split(",")[1]);
+		    		reportDateGeneratedLabel.setMinWidth(100);
+		    		Label reportTimeGeneratedLabel = new Label(currentLine.split(",")[2]);
+		    		reportTimeGeneratedLabel.setMinWidth(100);
+		    		
+		    		GridPaneToAdd.getChildren().addAll(reportNameLabel, reportDateGeneratedLabel, reportTimeGeneratedLabel);
+		    		GridPane.setConstraints(reportNameLabel, 0, 0);
+		    		GridPane.setConstraints(reportDateGeneratedLabel, 1, 0);
+		    		GridPane.setConstraints(reportTimeGeneratedLabel, 2, 0);
+		    		
+		    		reportList.add(GridPaneToAdd);
+		    	}
+		    	
+		    	databaseReader.close();
+			}
+			catch(IOException e) {e.printStackTrace();}
+			return reportList;
+		
+		}
+	
 	// Updates the project list view according to the database
 	public ObservableList<GridPane> projectRefreshListView()
 	{
@@ -275,7 +325,7 @@ public class PrototypeMain extends Application {
     // Currently logged in user's user-name ("testUser1", etc.)
     String currentUsername;
     
-    // Used for password encryption CHECK
+    // Used for password encryption
     String algorithm;
     String key;
     
@@ -293,7 +343,7 @@ public class PrototypeMain extends Application {
 		double scrollPaneWidth = 700;
 		double scrollPaneHeight = 300;
 		
-		// Encryption cipher is set up CHECK
+		// Encryption cipher is set up
 		
 		algorithm = "AES";
         try
@@ -537,6 +587,108 @@ public class PrototypeMain extends Application {
         // Defect Interface -------------------------------------------------------------
         
         // Report Interface -------------------------------------------------------------
+     // Creates the pane and scene for the project interface
+        VBox reportBox = new VBox(20);
+        reportBox.setAlignment(Pos.TOP_CENTER);
+        Scene reportScene = new Scene(reportBox, screenWidth, screenHeight);
+        
+        Label loggerTitle6 = new Label("Logger");
+        loggerTitle6.setFont(new Font(loggerTitle6.getFont().toString(), 30));
+        
+        // Contains the ListView of reports
+        ScrollPane reportScrollPane = new ScrollPane();
+        reportScrollPane.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+        
+        // Contains the list of reports
+        ListView<GridPane> reportListView = new ListView<GridPane>();
+        reportListView.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+
+        reportListView.setItems(reportRefreshListView());
+        
+        reportScrollPane.setContent(reportListView);
+        
+        // Labels for each display Node
+        Label reportNameLabel = new Label("Report Name");
+        Label reportLabel = new Label("Report");
+        
+        // Display Nodes
+        TextField reportName = new TextField();
+        TextArea report = new TextArea();
+        report.setEditable(false);
+        
+        // Changes the input fields when a project from the list is selected
+        reportListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<GridPane>() {
+            @Override
+            public void changed(ObservableValue<? extends GridPane> observable, GridPane oldValue, GridPane newValue) {
+                
+            	if(newValue != null && !((Label)newValue.getChildren().get(0)).getText().equals("Report Name"))
+            	{
+            		reportName.setText(((Label)newValue.getChildren().get(0)).getText());
+            		try
+                    {
+                    	BufferedReader databaseReader = new BufferedReader(new FileReader(reportFile));
+                    	String line;
+                    	while ((line = databaseReader.readLine()) != null) {
+    						
+                    		if(reportName.getText().equals(line.split(",")[0]))
+    						{
+    							String reportText = "Total Logger users: " + line.split(",")[3] + "\nTotal effort activities: " + line.split(",")[4] + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(line.split(",")[4])/ (double)Integer.parseInt(line.split(",")[3])) + "\nTotal defects: " + line.split(",")[5] + "\nAverage defects per employee: " + ((double) Integer.parseInt(line.split(",")[5])/ (double)Integer.parseInt(line.split(",")[3]));
+
+    							int count = 6;
+    							while(line.split(",").length > count)
+    		            		{
+    		            			reportText += "\n\n" + line.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line.split(",")[count+1] + "\nTotal defects: " + line.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line.split(",")[count+1])/ (double)Integer.parseInt(line.split(",")[count+2]));
+    		            			count += 3;
+    		            		}
+    		            		
+    		            		report.setText(reportText);
+    		            		reportName.setStyle("");
+    						}
+    					}
+                    	databaseReader.close();
+                    }
+                    catch(IOException e) {e.printStackTrace();}
+            		
+            	}
+            	// Nothing is shown if the user selects nothing or selects the list headers
+            	else if(newValue != null &&((Label)newValue.getChildren().get(0)).getText().equals("Report Name"))
+		        {
+            		reportName.setText("");
+            		report.setText("");
+            		reportName.setStyle("");
+		        }
+            }
+        });
+        
+        // Contains the input Nodes
+        GridPane reportGridPane = new GridPane();
+        reportGridPane.setHgap(10);
+        reportGridPane.setVgap(10);
+        reportGridPane.setPadding(new Insets(10,10,10,10));
+        
+        GridPane.setConstraints(reportNameLabel, 0, 0);
+        GridPane.setConstraints(reportName, 0, 1);
+        
+        GridPane.setConstraints(reportLabel, 1, 0);
+        GridPane.setConstraints(report, 1, 1);
+        
+        reportGridPane.getChildren().setAll(reportNameLabel, reportName, reportLabel, report);
+ 
+        // Buttons for the project interface (Handlers below)
+        HBox reportButtons = new HBox(40);
+        reportButtons.setAlignment(Pos.CENTER);
+        
+        Button generateReport = new Button("Generate Report");
+        Button deleteReport = new Button("Delete Report");
+        Button reportBackButton = new Button("Back");
+        
+        HBox.setMargin(generateReport, new Insets(10));
+        HBox.setMargin(deleteReport, new Insets(10));
+        HBox.setMargin(reportBackButton, new Insets(10));
+        
+        reportButtons.getChildren().addAll(generateReport, deleteReport, reportBackButton);
+        
+        reportBox.getChildren().addAll(new Label(), loggerTitle6, reportScrollPane, reportGridPane, reportButtons);
         
         // Project Interface -------------------------------------------------------------
         
@@ -613,6 +765,7 @@ public class PrototypeMain extends Application {
         Button projectBackButton = new Button("Back");
         
         HBox.setMargin(createProject, new Insets(10));
+        HBox.setMargin(editProject, new Insets(10));
         HBox.setMargin(deleteProject, new Insets(10));
         HBox.setMargin(eaBackButton, new Insets(10));
         
@@ -748,7 +901,7 @@ public class PrototypeMain extends Application {
 		
             			BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(credentialFile, true));
             			
-            			//CHECK encrypt password at this line
+            			// Password is encrypted
             			SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
             	        Cipher cipher = Cipher.getInstance(algorithm);
             	        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
@@ -790,7 +943,7 @@ public class PrototypeMain extends Application {
                 {
                 	BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));               	
                 	while ((line = databaseReader.readLine()) != null) {
-                		//CHECK
+                		// Password is decrypted
                 		SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
                         Cipher cipher = Cipher.getInstance(algorithm);
                         cipher.init(Cipher.DECRYPT_MODE, keySpec);
@@ -1124,9 +1277,170 @@ public class PrototypeMain extends Application {
         EventHandler<ActionEvent> reportsEventHandler = new EventHandler<ActionEvent>() {
         	@Override
             public void handle(ActionEvent event) {
+        		primaryStage.setScene(reportScene);
+        		reportListView.getSelectionModel().clearSelection();
+        		reportName.setStyle("");
+        		reportListView.setItems(reportRefreshListView());
         	}
         };
         reports.setOnAction(reportsEventHandler);
+       
+     // Handles generating a report
+	    EventHandler<ActionEvent> generateReportEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+		    	
+	    		boolean duplicateReportName = false;
+	    		try
+        		{ 	
+		    		BufferedReader databaseReader8 = new BufferedReader(new FileReader(reportFile));
+		    		String line8;
+		    		while((line8 = databaseReader8.readLine()) != null)
+		    		{
+		    			if(reportName.getText().equals(line8.split(",")[0]))
+		    			{
+		    				duplicateReportName = true;
+		    			}
+		    		}
+		    		databaseReader8.close();
+        		}
+	    		catch(Exception e) {e.printStackTrace();}
+	    		
+	    		if(!reportName.getText().equals("") && !duplicateReportName)
+		    	{
+	    			try
+	        		{   					
+		    			reportName.setStyle("");
+		    			
+		    			BufferedReader databaseReader4 = new BufferedReader(new FileReader(credentialFile));
+		    			int totalUsers = 0;
+	    				while((databaseReader4.readLine()) != null)
+	        			{
+	    					totalUsers++;
+	        			}
+	    				databaseReader4.close();
+	    				
+	    				BufferedReader databaseReader5 = new BufferedReader(new FileReader(effortFile));
+		    			int totalEAs = 0;
+	    				while((databaseReader5.readLine()) != null)
+	        			{
+	    					totalEAs++;
+	        			}
+	    				databaseReader5.close();
+	    				
+	    				BufferedReader databaseReader6 = new BufferedReader(new FileReader(defectFile));
+		    			int totalDefects = 0;
+	    				while((databaseReader6.readLine()) != null)
+	        			{
+	    					totalDefects++;
+	        			}
+	    				databaseReader6.close();
+	
+	                	BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(reportFile, true));
+	        			databaseWriter.write(reportName.getText() + "," + java.time.LocalDate.now() + "," + java.time.LocalTime.now() + "," + totalUsers + "," + totalEAs + "," + totalDefects + ",");
+	        			
+	                	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
+	                	String currentLine;
+	                	while((currentLine = databaseReader.readLine()) != null)
+	        			{
+	        				String projectName = currentLine.split(",")[0];
+	        				
+	        				BufferedReader databaseReader2 = new BufferedReader(new FileReader(effortFile));
+	        				int totalprojectEAs = 0;
+	        				String currentLine2;
+	        				while((currentLine2 = databaseReader2.readLine()) != null)
+	            			{
+	        					if(currentLine2.split(",")[2].equals(projectName))
+	        					{
+	        						totalprojectEAs++;
+	        					}
+	            			}
+	        				databaseReader2.close();
+	        				
+	        				BufferedReader databaseReader3 = new BufferedReader(new FileReader(defectFile));
+	        				int totalprojectDefects = 0;
+	        				String currentLine3;
+	        				while((currentLine3 = databaseReader3.readLine()) != null)
+	            			{
+	        					if(currentLine3.split(",")[2].equals(projectName)) //CHANGE 2 CHECK
+	        					{
+	        						totalprojectDefects++;
+	        					}
+	            			}
+	        				databaseReader3.close();
+	        				
+	        				databaseWriter.write(projectName + "," + totalprojectEAs + "," + totalprojectDefects + ",");
+	        			}
+	                	databaseReader.close();
+	        			databaseWriter.newLine();
+	            		databaseWriter.close();
+	                	reportListView.setItems(reportRefreshListView());
+
+	            		try
+	                    {
+	                    	BufferedReader databaseReader7 = new BufferedReader(new FileReader(reportFile));
+	                    	String line7;
+	                    	while ((line7 = databaseReader7.readLine()) != null) {
+	    						
+	                    		if(reportName.getText().equals(line7.split(",")[0]))
+	    						{
+	    							String reportText = "Total Logger users: " + line7.split(",")[3] + "\nTotal effort activities: " + line7.split(",")[4] + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(line7.split(",")[4])/ (double)Integer.parseInt(line7.split(",")[3])) + "\nTotal defects: " + line7.split(",")[5] + "\nAverage defects per employee: " + ((double) Integer.parseInt(line7.split(",")[5])/ (double)Integer.parseInt(line7.split(",")[3]));
+	    							int count = 6;
+	    							while(line7.split(",").length > count)
+	    		            		{
+	    		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
+	    		            			count += 3;
+	    		            		}
+	    		            		
+	    		            		report.setText(reportText);
+	    		            		reportName.setStyle("");
+	    						}
+	    					}
+	                    	databaseReader7.close();
+	                    }
+	                    catch(IOException e) {e.printStackTrace();}
+
+	        		}
+	        		catch(Exception e) {e.printStackTrace();}
+	    		}
+		    	else
+		    	{
+		    		reportName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+		    	}
+	    	}
+	    };
+	    generateReport.setOnAction(generateReportEventHandler);
+	    
+	 // Handles deleting a report
+	    EventHandler<ActionEvent> deleteReportEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+    			try {
+	    	        BufferedReader file = new BufferedReader(new FileReader(reportFile));
+	    	        StringBuffer inputBuffer = new StringBuffer();
+	    	        String line;
+
+	    	     // Reads through report_database and removes the given report
+	    	        while ((line = file.readLine()) != null) {
+	    	            if(!line.split(",")[0].equals(reportName.getText()))
+	    	            {
+	    	            	inputBuffer.append(line);
+	    	            	inputBuffer.append('\n');
+	    	            }
+	    	        }
+	    	        file.close();
+
+	    	        FileOutputStream fileOut = new FileOutputStream(reportFile);
+	    	        fileOut.write(inputBuffer.toString().getBytes());
+	    	        fileOut.close();
+	    	        
+	    	        reportListView.setItems(reportRefreshListView());
+	    	    } 
+	    		catch (Exception e) {e.printStackTrace();}
+	    		
+	    	}
+	    };
+	    deleteReport.setOnAction(deleteReportEventHandler);
         
      // Handles entering the projects interface
         EventHandler<ActionEvent> projectsEventHandler = new EventHandler<ActionEvent>() {
@@ -1302,7 +1616,6 @@ public class PrototypeMain extends Application {
 	    	        StringBuffer inputBuffer = new StringBuffer();
 	    	        String line;
 
-	    	     // Reads through credentials_database and removes the given account
 	    	        while ((line = file.readLine()) != null) {
 	    	            if((!line.split(",")[0].equals(accountName)))
 	    	            {
@@ -1357,6 +1670,7 @@ public class PrototypeMain extends Application {
 	    eaBackButton.setOnAction(backEventHandler);
 	    projectBackButton.setOnAction(backEventHandler);
 	    accountBackButton.setOnAction(backEventHandler);
+	    reportBackButton.setOnAction(backEventHandler);
    
     }
 	
