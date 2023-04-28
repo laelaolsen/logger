@@ -1,6 +1,6 @@
-testUser3,effortName,EffortLogger,Implementation Plan,Plans,1969-01-23,1969-01-25,description is here!
-laela,effort,EffortLogger,Detailed Design Plan,Deliverables,2023-04-20,2023-04-28,hello
-testUser3,effortName2,EffortLogger,Test Case Generation,Plans,1969-01-23,1969-01-25,description is here!
-testUser3,e,project1,Detailed Design Review,Deliverables,2023-04-19,2023-04-22,dnwn
-testUser3,a,newProject,Drafting,Other,2023-04-12,2023-04-26,vbbv
-testUser1,d,project1,Detailed Design Review,Deliverables,2023-04-27,2023-04-29,wdw
+test1,ea1,Project A,Solution Specification,Other,2023-04-19,2023-04-28,This is the description!
+test2,ea2,Project B,Solution Specification,Other,2023-04-19,2023-04-28,This is the description!
+test2,ea3,Project B,Solution Specification,Other,2023-04-19,2023-04-28,
+test3,ea4,Project C,Solution Specification,Other,2023-04-19,2023-04-28,This is the description!
+test3,ea5,Project C,Solution Specification,Other,2023-04-19,2023-04-28,This is the description!
+test3,ea6,Project C,Solution Specification,Other,2023-04-19,2023-04-28,
