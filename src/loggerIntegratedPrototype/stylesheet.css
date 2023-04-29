@@ -1,0 +1,20 @@
+/* 
+    Document   : controlStyle1
+*/
+
+.root{
+    -fx-font-size: 10pt;
+    -fx-font-family: "Avanta Garde";
+    -fx-base: #b1dbf0;
+    -fx-background: #f5f5f5;
+    -fx-focus-color: #b1dbf0;
+}
+
+.button{
+    -fx-background-color: #b1dbf0;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: #193645;
+}
+
+.scroll-pane{
+}
