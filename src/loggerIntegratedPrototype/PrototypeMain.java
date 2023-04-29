@@ -44,7 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * <p> Title: Logger Integrated Prototype. </p>
  * <p> Description: 
- * @author Laela Olsen
+ * @authors Laela Olsen, Ryan Dagnino
  * 
  */
 
@@ -103,7 +103,7 @@ public class PrototypeMain extends Application {
         	GridPane.setConstraints(effortProjectNameHeaderLabel, 1, 0);
         	
         	Label effortLCSHeaderLabel = new Label("Life Cycle Step");
-        	effortLCSHeaderLabel.setMinWidth(minWidth);
+        	effortLCSHeaderLabel.setMinWidth(minWidth*2);
         	GridPane.setConstraints(effortLCSHeaderLabel, 2, 0);
         	
         	Label effortECHeaderLabel = new Label("Effort Category");
@@ -142,7 +142,7 @@ public class PrototypeMain extends Application {
 	        		effortProjectNameLabel.setMinWidth(minWidth);
 	        		
 	        		Label effortLCSLabel = new Label(currentLine.split(",")[3]);
-	        		effortLCSLabel.setMinWidth(minWidth);
+	        		effortLCSLabel.setMinWidth(minWidth*2);
 	        		
 	        		Label effortECLabel = new Label(currentLine.split(",")[4]);
 	        		effortECLabel.setMinWidth(minWidth);
@@ -184,6 +184,107 @@ public class PrototypeMain extends Application {
         catch(IOException e) {e.printStackTrace();}
 		return eaList;
 	}
+	
+	// Updates the Defect List
+	public ObservableList<GridPane> defectRefreshListView()
+	{
+		ObservableList<GridPane> defectList = FXCollections.observableArrayList();
+		try {
+    		String currentLine;
+    		BufferedReader databaseReader = new BufferedReader(new FileReader(defectFile));
+  		
+    		GridPane defectListHeaders = null;
+            
+    		// Horizontal distance between ListView elements
+    		double minWidth = 100;
+            
+        	// Adds headers to the ListView
+    		defectListHeaders = new GridPane();
+        	defectListHeaders.setHgap(50);
+        	defectListHeaders.setPadding(new Insets(5,5,5,5));
+    		
+        	Label defectNameHeaderLabel = new Label("Defect Name");
+        	defectNameHeaderLabel.setMinWidth(minWidth);
+        	GridPane.setConstraints(defectNameHeaderLabel, 0, 0);
+        	
+        	Label defectProjectNameHeaderLabel = new Label("Project");
+        	defectProjectNameHeaderLabel.setMinWidth(minWidth);
+        	GridPane.setConstraints(defectProjectNameHeaderLabel, 1, 0);
+        	
+        	Label defectLCSInitialHeaderLabel = new Label("Life Cycle Step When Injected");
+        	defectLCSInitialHeaderLabel.setMinWidth(minWidth*2);
+        	GridPane.setConstraints(defectLCSInitialHeaderLabel, 2, 0);
+        	
+        	Label defectLCSPostHeaderLabel = new Label("Life Cycle Step When Removed");
+        	defectLCSPostHeaderLabel.setMinWidth(minWidth*2);
+        	GridPane.setConstraints(defectLCSPostHeaderLabel, 3, 0);
+        	
+        	Label defectECHeaderLabel = new Label("Defect Category");
+        	defectECHeaderLabel.setMinWidth(minWidth);
+        	GridPane.setConstraints(defectECHeaderLabel, 4, 0);
+        	
+        	Label defectDescriptionHeaderLabel = new Label("Defect Description");
+        	defectDescriptionHeaderLabel.setMinWidth(minWidth);
+        	GridPane.setConstraints(defectDescriptionHeaderLabel, 5, 0);
+        	
+        	defectListHeaders.getChildren().addAll(defectNameHeaderLabel, defectProjectNameHeaderLabel, defectLCSInitialHeaderLabel, defectLCSPostHeaderLabel, defectECHeaderLabel, defectDescriptionHeaderLabel);
+        	defectList.add(defectListHeaders);
+    		
+    		// Adds each effort activity from the database to the ListView
+        	while((currentLine = databaseReader.readLine()) != null) 
+        	{	
+	        	// Checks that the current effort activity belongs to the current user
+        		if(currentLine.split(",")[0].equals(currentUsername))
+	        	{
+    				GridPane GridPaneToAdd = new GridPane();
+	        		GridPaneToAdd.setHgap(50);
+	        		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
+	        		
+	        		Label defectNameLabel = new Label(currentLine.split(",")[1]);
+	        		defectNameLabel.setMinWidth(minWidth);
+	        		
+	        		Label defectProjectNameLabel = new Label(currentLine.split(",")[2]);
+	        		defectProjectNameLabel.setMinWidth(minWidth);
+	        		
+	        		Label defectLCSInitialLabel = new Label(currentLine.split(",")[3]);
+	        		defectLCSInitialLabel.setMinWidth(minWidth*2);
+	        		
+	        		Label defectLCSPostLabel = new Label(currentLine.split(",")[4]);
+	        		defectLCSPostLabel.setMinWidth(minWidth*2);
+	        		
+	        		Label defectECLabel = new Label(currentLine.split(",")[5]);
+	        		defectECLabel.setMinWidth(minWidth);
+	        		
+	        		Label defectDescriptionLabel;
+	        		// Checks if there is a description
+	        		if(currentLine.split(",").length > 6)
+    	        	{
+	        			defectDescriptionLabel = new Label(currentLine.split(",")[6]);
+    	        		defectDescriptionLabel.setMinWidth(minWidth);
+    	        	}
+    	        	else
+    	        	{
+    	        		defectDescriptionLabel = new Label("");
+    	        		defectDescriptionLabel.setMinWidth(minWidth);
+    	        	}
+	        		
+	        		GridPaneToAdd.getChildren().addAll(defectNameLabel, defectProjectNameLabel, defectLCSInitialLabel, defectLCSPostLabel, defectECLabel, defectDescriptionLabel);
+	        		GridPane.setConstraints(defectNameLabel, 0, 0);
+	        		GridPane.setConstraints(defectProjectNameLabel, 1, 0);
+	        		GridPane.setConstraints(defectLCSInitialLabel, 2, 0);
+	        		GridPane.setConstraints(defectLCSPostLabel, 3, 0);	
+	        		GridPane.setConstraints(defectECLabel, 4, 0);
+	        		GridPane.setConstraints(defectDescriptionLabel, 5, 0);
+	        		
+	        		defectList.add(GridPaneToAdd);
+	        	}
+        	}
+        	
+        	databaseReader.close();     	
+        }
+        catch(IOException e) {e.printStackTrace();}
+		return defectList;
+	}	
 	
 	// Updates the report list view according to the database
 		public ObservableList<GridPane> reportRefreshListView()
@@ -585,6 +686,151 @@ public class PrototypeMain extends Application {
         eaPane.getChildren().addAll(new Label(), loggerTitle3, eaScrollPane, eaGridPane, eaButtons);
         
         // Defect Interface -------------------------------------------------------------
+     // Creates pane and scene for defect interface
+        VBox dfPane = new VBox(20);
+        dfPane.setAlignment(Pos.TOP_CENTER);
+        Scene dfScene = new Scene(dfPane, screenWidth, screenHeight);
+    
+        Label dfLoggerTitle = new Label("Logger");
+        dfLoggerTitle.setFont(new Font(dfLoggerTitle.getFont().toString(), 30));
+        
+        // Contains the list of defects
+        ScrollPane defectScrollPane = new ScrollPane();
+        defectScrollPane.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+        ListView<GridPane> defectListView = new ListView<GridPane>();
+        defectListView.setPrefSize(scrollPaneWidth, scrollPaneHeight);
+        
+        defectListView.setItems(defectRefreshListView());
+        
+        defectScrollPane.setContent(defectListView);
+        
+        // Creates Labels for data fields
+        Label defectNameLabel = new Label("Defect Name");
+        Label defectProjectLabel = new Label("Project Name");
+        Label defectLCSInitalLabel = new Label("Life Cycle Step When Injected");
+        Label defectLCSPostLabel = new Label("Life Cycle Step When Removed");
+        Label defectECLabel = new Label("Defect Category");
+        Label defectCommentLabel = new Label("Defect Description");
+        
+        TextField defectName = new TextField();
+        TextArea defectComment = new TextArea();
+        defectComment.setPrefColumnCount(20);
+        ChoiceBox<String> defectProject = new ChoiceBox<String>();
+        
+        // Generates the available projects for the projects drop down
+        String defectLine;
+        try {
+        	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
+        	while ((defectLine = databaseReader.readLine()) != null) {
+        		defectProject.getItems().add(defectLine.split(",")[0]);
+        	}
+        	databaseReader.close();
+        }
+        catch(IOException e) {e.printStackTrace();}
+        
+        @SuppressWarnings("rawtypes")
+		ChoiceBox defectLCSInitial = new ChoiceBox();
+        defectLCSInitial.getItems().addAll("Planning", "Information Gathering", "Information Understanding", 
+        		"Verifying", "Outlining", "Drafting", "Finalizing", "Team Meeting", "Coach Meeting", 
+        		"Stakeholder Meeting", new Separator(), "Problem Understanding", "Conceptual Design Plan", 
+        		"Requirements", "Conceptual Design", "Conceptual Design Review", "Detailed Design Plan", 
+        		"Detailed Design/Prototype", "Detailed Design Review", "Implementation Plan", 
+        		"Test Case Generation", "Solution Specification", "Solution Review", 
+        		"Solution Implementation", "Unit/System Test", "Reflection", "Repository Update");
+        
+        @SuppressWarnings("rawtypes")
+		ChoiceBox defectLCSPost = new ChoiceBox();
+        defectLCSPost.getItems().addAll("Planning", "Information Gathering", "Information Understanding", 
+        		"Verifying", "Outlining", "Drafting", "Finalizing", "Team Meeting", "Coach Meeting", 
+        		"Stakeholder Meeting", new Separator(), "Problem Understanding", "Conceptual Design Plan", 
+        		"Requirements", "Conceptual Design", "Conceptual Design Review", "Detailed Design Plan", 
+        		"Detailed Design/Prototype", "Detailed Design Review", "Implementation Plan", 
+        		"Test Case Generation", "Solution Specification", "Solution Review", 
+        		"Solution Implementation", "Unit/System Test", "Reflection", "Repository Update");
+        
+        ChoiceBox<String> defectEC = new ChoiceBox<String>();
+        defectEC.getItems().addAll("Not Specified", "10 Documentation", "20 Syntax", "30 Build, Package", "40 Assignment",
+        		"50 Interface", "60 Checking", "70 Data", "80 Function", "90 System", "100 Environment");
+        
+        
+        
+        
+        defectListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<GridPane>() {
+            @Override
+            public void changed(ObservableValue<? extends GridPane> observable, GridPane oldValue, GridPane newValue) {
+                
+            	if(newValue != null && !((Label)newValue.getChildren().get(0)).getText().equals("Defect Name"))
+            	{
+            		defectName.setText(((Label)newValue.getChildren().get(0)).getText());
+            		defectProject.getSelectionModel().select(((Label)newValue.getChildren().get(1)).getText());
+            		defectLCSInitial.getSelectionModel().select(((Label)newValue.getChildren().get(2)).getText());
+            		defectLCSPost.getSelectionModel().select(((Label)newValue.getChildren().get(3)).getText());
+            		defectEC.getSelectionModel().select(((Label)newValue.getChildren().get(4)).getText());
+            		defectComment.setText(((Label)newValue.getChildren().get(5)).getText());
+            		
+            		defectName.setStyle("");
+                    defectProject.setStyle("");
+                    defectLCSInitial.setStyle("");
+                    defectLCSPost.setStyle("");
+                    defectEC.setStyle("");
+            	}
+            	// Nothing is shown if the user selects nothing or selects the list headers
+            	else if(newValue != null &&((Label)newValue.getChildren().get(0)).getText().equals("Defect Name"))
+		        {
+            		defectName.setText("");
+            		defectProject.getSelectionModel().select(null);
+            		defectLCSInitial.getSelectionModel().select(null);
+            		defectLCSPost.getSelectionModel().select(null);
+            		defectEC.getSelectionModel().select(null);
+            		defectComment.setText("");
+            		
+            		defectName.setStyle("");
+                    defectProject.setStyle("");
+                    defectLCSInitial.setStyle("");
+                    defectLCSPost.setStyle("");
+                    defectEC.setStyle("");
+		        }
+            }
+        });
+        
+
+        
+        GridPane defectGridPane = new GridPane();
+        defectGridPane.setHgap(10);
+        defectGridPane.setVgap(10);
+        defectGridPane.setPadding(new Insets(10,10,10,10));
+        
+        defectGridPane.getChildren().setAll(defectNameLabel, defectProjectLabel, defectLCSInitalLabel, defectLCSPostLabel, defectECLabel, defectCommentLabel, defectName, defectProject, defectLCSInitial, defectLCSPost, defectEC, defectComment);
+        
+        // Sets the scene for the defect data options
+        GridPane.setConstraints(defectNameLabel, 0, 0);
+        GridPane.setConstraints(defectProjectLabel, 1, 0);
+        GridPane.setConstraints(defectLCSInitalLabel, 2, 0);
+        GridPane.setConstraints(defectLCSPostLabel, 3, 0);
+        GridPane.setConstraints(defectECLabel, 4, 0);
+        GridPane.setConstraints(defectName, 0, 1);
+        GridPane.setConstraints(defectProject, 1, 1);
+        GridPane.setConstraints(defectLCSInitial, 2, 1);
+        GridPane.setConstraints(defectLCSPost, 3, 1);
+        GridPane.setConstraints(defectEC, 4, 1);
+        GridPane.setConstraints(defectCommentLabel, 0, 2);
+        GridPane.setConstraints(defectComment, 0, 3, 2, 1);
+       
+        
+        HBox defectButtons = new HBox(40);
+        defectButtons.setAlignment(Pos.CENTER);
+        
+        Button createDefect = new Button("Create Defect");
+        Button deleteDefect = new Button("Delete Defect");
+        Button defectBackButton = new Button("Back");
+        
+        HBox.setMargin(createDefect, new Insets(10));
+        HBox.setMargin(deleteDefect, new Insets(10));
+        HBox.setMargin(eaBackButton, new Insets(10));
+        
+        defectButtons.getChildren().addAll(createDefect, deleteDefect, defectBackButton);
+        
+        dfPane.getChildren().addAll(new Label(), dfLoggerTitle, defectScrollPane, defectGridPane, defectButtons);
         
         // Report Interface -------------------------------------------------------------
      // Creates the pane and scene for the project interface
@@ -1267,11 +1513,180 @@ public class PrototypeMain extends Application {
      // Handles entering the defects interface
         EventHandler<ActionEvent> defectsEventHandler = new EventHandler<ActionEvent>() {
         	@Override
-            public void handle(ActionEvent event) {
-        		
+            public void handle(ActionEvent event) 
+        	{
+        		defectName.setStyle("");
+                defectProject.setStyle("");
+                defectLCSInitial.setStyle("");
+                defectLCSPost.setStyle("");
+                defectEC.setStyle("");
+                
+                
+                // Sets up the ListView based on effort_database
+                defectListView.setItems(defectRefreshListView());
+                
+                // Refreshes the list of projects using the project_database
+                String line;
+                defectProject.getItems().clear();
+	            try
+	            {
+                    BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
+                    while ((line = databaseReader.readLine()) != null) 
+                    {
+                    	defectProject.getItems().add(line.split(",")[0]);
+                    }
+                    databaseReader.close();
+	            }
+	            catch(IOException e) {e.printStackTrace();}
+	                        
+	            primaryStage.setScene(dfScene);
         	}
         };
         defects.setOnAction(defectsEventHandler);
+        
+     // Handles the creation of new defects
+	    EventHandler<ActionEvent> createDefectEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+        		// All input Nodes are set to default black upon successful creation or edit
+	    		defectName.setStyle("");
+        		defectProject.setStyle("");
+        		defectLCSInitial.setStyle("");
+        		defectLCSPost.setStyle("");
+        		defectEC.setStyle("");
+	    		try
+        		{   		
+    					
+	        		boolean defectDuplicateName = false;
+	        		boolean defectInvalid = false;
+	        		
+	        		BufferedReader databaseReader = new BufferedReader(new FileReader(defectFile));
+                	String currentLine;
+                	// Checks whether to edit an activity (name already exists) or create a new effort effort
+                	
+                	while((currentLine = databaseReader.readLine()) != null) 
+                	{
+                		if(currentLine.split(",")[1].equals(defectName.getText()))
+                		{
+                			defectDuplicateName = true;
+                		}
+                	}
+                	
+                	// These if statements check if various input Nodes are blank
+                	// and set them to have a red outline if they are
+                	if(defectName.getText().equals(""))
+                	{
+                		defectName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                		defectInvalid = true;
+                	}
+                	if(defectProject.getSelectionModel().getSelectedItem() == null)
+                	{
+                		defectProject.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                		defectInvalid = true;
+                	}
+                	if(defectLCSInitial.getSelectionModel().getSelectedItem() == null)
+                	{
+                		defectLCSInitial.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                		defectInvalid = true;
+                	}
+                	if(defectLCSPost.getSelectionModel().getSelectedItem() == null)
+                	{
+                		defectLCSPost.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                		defectInvalid = true;
+                	}
+                	if(defectEC.getSelectionModel().getSelectedItem() == null)
+                	{
+                		defectEC.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                		defectInvalid = true;
+                	}
+                	
+                	databaseReader.close();
+                	
+	    			// A new, valid, effort activity is created
+                	if(!defectDuplicateName && !defectInvalid)
+	        		{
+	    				BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(defectFile, true));
+	        			databaseWriter.write(currentUsername + "," +
+	        					defectName.getText() + "," + 
+	        					defectProject.getSelectionModel().getSelectedItem() + "," + 
+	        					defectLCSInitial.getSelectionModel().getSelectedItem() + "," + 
+	        					defectLCSPost.getSelectionModel().getSelectedItem() + "," +
+	        					defectEC.getSelectionModel().getSelectedItem() +  "," +
+	        					defectComment.getText());
+	        			databaseWriter.newLine();
+	            		databaseWriter.close();
+	        		}
+	    			// The effort activity specified is edited
+                	else if(defectDuplicateName && !defectInvalid)
+	    			{
+	    				BufferedReader file = new BufferedReader(new FileReader(defectFile));
+		    	        StringBuffer inputBuffer = new StringBuffer();
+		    	        String line;
+	
+		    	        // Reads through effort_database and edits the correct entry
+		    	        while ((line = file.readLine()) != null) {
+		    	            if(line.split(",")[1].equals(defectName.getText()))
+		    	            {
+		    	            	inputBuffer.append(currentUsername + "," +
+			        					defectName.getText() + "," + 
+			        					defectProject.getSelectionModel().getSelectedItem() + "," + 
+			        					defectLCSInitial.getSelectionModel().getSelectedItem() + "," + 
+			        					defectLCSPost.getSelectionModel().getSelectedItem() + "," + 
+			        					defectEC.getSelectionModel().getSelectedItem() +  "," +
+			        					defectComment.getText());
+		    	            }
+		    	            else
+	    	            	{
+		    	            	inputBuffer.append(line);
+	    	            	}
+		    	            inputBuffer.append('\n');
+		    	        }
+		    	        file.close();
+	
+		    	        FileOutputStream fileOut = new FileOutputStream(defectFile);
+		    	        fileOut.write(inputBuffer.toString().getBytes());
+		    	        fileOut.close();
+	
+	    			}
+ 	
+                }
+                catch(IOException e) {e.printStackTrace();}
+                
+	    		// Refreshes the ListView based on effort_database to reflect the change
+	    		defectListView.setItems(defectRefreshListView());
+	    	}
+	    };
+	    createDefect.setOnAction(createDefectEventHandler);
+
+	    // Handles the delete defect action
+	    EventHandler<ActionEvent> deleteDefectEventHandler = new EventHandler<ActionEvent>() {
+	    	@Override
+	        public void handle(ActionEvent event) {
+	    		try {
+	    	        BufferedReader file = new BufferedReader(new FileReader(defectFile));
+	    	        StringBuffer inputBuffer = new StringBuffer();
+	    	        String defectLineCheck;
+
+	    	     // Reads through project_database and removes the given project
+	    	        while ((defectLineCheck = file.readLine()) != null) {
+	    	            if(!((defectLineCheck.split(",")[1].equals(defectName.getText()))))
+	    	            {
+	    	            	inputBuffer.append(defectLineCheck);
+	    	            	inputBuffer.append('\n');
+	    	            }
+	    	        }
+	    	        file.close();
+
+	    	        FileOutputStream fileOut = new FileOutputStream(defectFile);
+	    	        fileOut.write(inputBuffer.toString().getBytes());
+	    	        fileOut.close();
+	    	        
+	    	        defectListView.setItems(defectRefreshListView());
+	    	    } 
+	    		catch (Exception e) {e.printStackTrace();}
+	    	}
+	    };
+	    deleteDefect.setOnAction(deleteDefectEventHandler);
         
      // Handles entering the reports interface
         EventHandler<ActionEvent> reportsEventHandler = new EventHandler<ActionEvent>() {
@@ -1668,6 +2083,7 @@ public class PrototypeMain extends Application {
 	    	}
 	    };
 	    eaBackButton.setOnAction(backEventHandler);
+	    defectBackButton.setOnAction(backEventHandler);
 	    projectBackButton.setOnAction(backEventHandler);
 	    accountBackButton.setOnAction(backEventHandler);
 	    reportBackButton.setOnAction(backEventHandler);
