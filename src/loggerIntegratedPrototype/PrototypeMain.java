@@ -43,7 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * <p> Title: Logger Integrated Prototype. </p>
- * <p> Description: 
+ * <p> Description: This file contains all of the code for the Logger application
  * @authors Laela Olsen, Ryan Dagnino
  * 
  */
@@ -579,7 +579,7 @@ public class PrototypeMain extends Application {
         	}
         });
         
-        // Effort Activity Interface -------------------------------------------------------------
+        // Effort Activity Interface ---------------------------------------- Laela Olsen
         
         // Creates the pane and scene for the effort activity interface
         VBox eaPane = new VBox(20);
@@ -685,7 +685,7 @@ public class PrototypeMain extends Application {
         
         eaPane.getChildren().addAll(new Label(), loggerTitle3, eaScrollPane, eaGridPane, eaButtons);
         
-        // Defect Interface -------------------------------------------------------------
+        // Defect Interface ---------------------------------------- Ryan Dagnino
      // Creates pane and scene for defect interface
         VBox dfPane = new VBox(20);
         dfPane.setAlignment(Pos.TOP_CENTER);
@@ -832,7 +832,7 @@ public class PrototypeMain extends Application {
         
         dfPane.getChildren().addAll(new Label(), dfLoggerTitle, defectScrollPane, defectGridPane, defectButtons);
         
-        // Report Interface -------------------------------------------------------------
+        // Report Interface ---------------------------------------- Laela Olsen
      // Creates the pane and scene for the project interface
         VBox reportBox = new VBox(20);
         reportBox.setAlignment(Pos.TOP_CENTER);
@@ -936,7 +936,7 @@ public class PrototypeMain extends Application {
         
         reportBox.getChildren().addAll(new Label(), loggerTitle6, reportScrollPane, reportGridPane, reportButtons);
         
-        // Project Interface -------------------------------------------------------------
+        // Project Interface ---------------------------------------- Laela Olsen
         
         // Creates the pane and scene for the project interface
         VBox projectBox = new VBox(20);
@@ -1019,7 +1019,7 @@ public class PrototypeMain extends Application {
         
         projectBox.getChildren().addAll(new Label(), loggerTitle4, projectScrollPane, projectGridPane, projectButtons);
      
-        //Account Interface -------------------------------------------------------------
+        //Account Interface ---------------------------------------- Laela Olsen
         VBox accountBox = new VBox(20);
         accountBox.setAlignment(Pos.TOP_CENTER);
         Scene accountScene = new Scene(accountBox, screenWidth, screenHeight);
@@ -1075,8 +1075,7 @@ public class PrototypeMain extends Application {
         accountBox.getChildren().addAll(new Label(), loggerTitle5, accountScrollPane, accountButtons);
         
 
-        
-        // Button EventHandlers -------------------------------------------------------------
+        // Button EventHandlers ------------------------------ Laela Olsen, Ryan Dagnino
         EventHandler<ActionEvent> signUpButtonEventHandler = new EventHandler<ActionEvent>() {
  
             @Override
