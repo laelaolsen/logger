@@ -27,7 +27,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.text.Font;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
@@ -442,7 +441,7 @@ public class PrototypeMain extends Application {
 		double screenHeight = 540;
 		
 		double scrollPaneWidth = 700;
-		double scrollPaneHeight = 300;
+		double scrollPaneHeight = 400;
 		
 		// Encryption cipher is set up
 		
@@ -464,7 +463,7 @@ public class PrototypeMain extends Application {
 		
 		// Creates and formats the Logger title
         Label loggerTitle = new Label("Logger");
-        loggerTitle.setFont(new Font(loggerTitle.getFont().toString(), 30));
+        loggerTitle.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // loginGrid will hold the user-name and password input areas
         GridPane loginGrid = new GridPane();
@@ -555,7 +554,7 @@ public class PrototypeMain extends Application {
         
         // Adds a title depending on the user type
      	Label loggerTitle2 = new Label("Logger");
-        loggerTitle2.setFont(new Font(loggerTitle2.getFont().toString(), 30));
+     	loggerTitle2.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
 		
 		// Buttons for each option (Handlers below)
         Button effortActivities = new Button("Effort Activities");
@@ -587,7 +586,7 @@ public class PrototypeMain extends Application {
         Scene eaScene = new Scene(eaPane, screenWidth, screenHeight);
         
         Label loggerTitle3 = new Label("Logger");
-        loggerTitle3.setFont(new Font(loggerTitle3.getFont().toString(), 30));
+        loggerTitle3.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // Contains the ListView of effort activities
         ScrollPane eaScrollPane = new ScrollPane();
@@ -618,6 +617,7 @@ public class PrototypeMain extends Application {
         TextField eaName = new TextField();
         
         ChoiceBox<String> eaProject = new ChoiceBox<String>();
+        eaProject.setMinWidth(100);
         
         // Reads the names of each project to populate the project ChoiceBox
         String line;
@@ -692,7 +692,7 @@ public class PrototypeMain extends Application {
         Scene dfScene = new Scene(dfPane, screenWidth, screenHeight);
     
         Label dfLoggerTitle = new Label("Logger");
-        dfLoggerTitle.setFont(new Font(dfLoggerTitle.getFont().toString(), 30));
+        dfLoggerTitle.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // Contains the list of defects
         ScrollPane defectScrollPane = new ScrollPane();
@@ -716,6 +716,7 @@ public class PrototypeMain extends Application {
         TextArea defectComment = new TextArea();
         defectComment.setPrefColumnCount(20);
         ChoiceBox<String> defectProject = new ChoiceBox<String>();
+        defectProject.setMinWidth(100);
         
         // Generates the available projects for the projects drop down
         String defectLine;
@@ -807,14 +808,14 @@ public class PrototypeMain extends Application {
         GridPane.setConstraints(defectProjectLabel, 1, 0);
         GridPane.setConstraints(defectLCSInitalLabel, 2, 0);
         GridPane.setConstraints(defectLCSPostLabel, 3, 0);
-        GridPane.setConstraints(defectECLabel, 4, 0);
+        GridPane.setConstraints(defectECLabel, 0, 2);
         GridPane.setConstraints(defectName, 0, 1);
         GridPane.setConstraints(defectProject, 1, 1);
         GridPane.setConstraints(defectLCSInitial, 2, 1);
         GridPane.setConstraints(defectLCSPost, 3, 1);
-        GridPane.setConstraints(defectEC, 4, 1);
-        GridPane.setConstraints(defectCommentLabel, 0, 2);
-        GridPane.setConstraints(defectComment, 0, 3, 2, 1);
+        GridPane.setConstraints(defectEC, 0, 3);
+        GridPane.setConstraints(defectCommentLabel, 1, 2);
+        GridPane.setConstraints(defectComment, 1, 3, 2, 1);
        
         
         HBox defectButtons = new HBox(40);
@@ -839,7 +840,7 @@ public class PrototypeMain extends Application {
         Scene reportScene = new Scene(reportBox, screenWidth, screenHeight);
         
         Label loggerTitle6 = new Label("Logger");
-        loggerTitle6.setFont(new Font(loggerTitle6.getFont().toString(), 30));
+        loggerTitle6.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // Contains the ListView of reports
         ScrollPane reportScrollPane = new ScrollPane();
@@ -944,7 +945,7 @@ public class PrototypeMain extends Application {
         Scene projectScene = new Scene(projectBox, screenWidth, screenHeight);
         
         Label loggerTitle4 = new Label("Logger");
-        loggerTitle4.setFont(new Font(loggerTitle4.getFont().toString(), 30));
+        loggerTitle4.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // Contains the ListView of projects
         ScrollPane projectScrollPane = new ScrollPane();
@@ -960,6 +961,7 @@ public class PrototypeMain extends Application {
         
         // Labels for each input Node
         Label projectNameLabel = new Label("Project Name");
+        projectNameLabel.setMinWidth(100);
         Label projectMembersLabel = new Label("Members");
         
         // Input Nodes
@@ -1025,7 +1027,7 @@ public class PrototypeMain extends Application {
         Scene accountScene = new Scene(accountBox, screenWidth, screenHeight);
         
         Label loggerTitle5 = new Label("Logger");
-        loggerTitle5.setFont(new Font(loggerTitle5.getFont().toString(), 30));
+        loggerTitle5.setStyle("-fx-font-family: 'Lucida Bright'; -fx-font-size: 30");
         
         // Contains the ListView of accounts
         ScrollPane accountScrollPane = new ScrollPane();
@@ -1074,6 +1076,13 @@ public class PrototypeMain extends Application {
         
         accountBox.getChildren().addAll(new Label(), loggerTitle5, accountScrollPane, accountButtons);
         
+        mainScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        optionSelectScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        eaScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        dfScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        projectScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        reportScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
+        accountScene.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
 
         // Button EventHandlers ------------------------------ Laela Olsen, Ryan Dagnino
         EventHandler<ActionEvent> signUpButtonEventHandler = new EventHandler<ActionEvent>() {
@@ -1302,8 +1311,7 @@ public class PrototypeMain extends Application {
 	            	databaseReader.close();
 	            }
 	            catch(IOException e) {e.printStackTrace();}
-	        		
-	        	primaryStage.setScene(eaScene);	
+	        	primaryStage.setScene(eaScene);
         	}
         };
         effortActivities.setOnAction(effortActivitiesEventHandler);
