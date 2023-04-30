@@ -127,7 +127,11 @@ public class PrototypeMain extends Application {
     		// Adds each effort activity from the database to the ListView
         	while((currentLine = databaseReader.readLine()) != null) 
         	{	
-	        	// Checks that the current effort activity belongs to the current user
+        		if(currentLine.split(",").length < 2)
+	    		{
+	    			break;
+	    		}
+        		// Checks that the current effort activity belongs to the current user
         		if(currentLine.split(",")[0].equals(currentUsername))
 	        	{
     				GridPane GridPaneToAdd = new GridPane();
@@ -232,7 +236,11 @@ public class PrototypeMain extends Application {
     		// Adds each effort activity from the database to the ListView
         	while((currentLine = databaseReader.readLine()) != null) 
         	{	
-	        	// Checks that the current effort activity belongs to the current user
+        		if(currentLine.split(",").length < 2)
+	    		{
+	    			break;
+	    		}
+        		// Checks that the current effort activity belongs to the current user
         		if(currentLine.split(",")[0].equals(currentUsername))
 	        	{
     				GridPane GridPaneToAdd = new GridPane();
@@ -310,6 +318,10 @@ public class PrototypeMain extends Application {
 				
 		    	while((currentLine = databaseReader.readLine()) != null) 
 		    	{
+		    		if(currentLine.split(",").length < 2)
+		    		{
+		    			break;
+		    		}
 		    		GridPane GridPaneToAdd = new GridPane();
 		    		GridPaneToAdd.setHgap(50);
 		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
@@ -356,6 +368,10 @@ public class PrototypeMain extends Application {
 			
 	    	while((currentLine = databaseReader.readLine()) != null) 
 	    	{
+	    		if(currentLine.split(",").length < 2)
+	    		{
+	    			break;
+	    		}
 	    		GridPane GridPaneToAdd = new GridPane();
 	    		GridPaneToAdd.setHgap(50);
 	    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
@@ -397,6 +413,10 @@ public class PrototypeMain extends Application {
 				
 		    	while((currentLine = databaseReader.readLine()) != null) 
 		    	{
+		    		if(currentLine.split(",").length < 2)
+		    		{
+		    			break;
+		    		}
 		    		GridPane GridPaneToAdd = new GridPane();
 		    		GridPaneToAdd.setHgap(50);
 		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
@@ -1383,6 +1403,10 @@ public class PrototypeMain extends Application {
                 	// Checks whether to edit an activity (name already exists) or create a new effort effort
                 	while((currentLine = databaseReader.readLine()) != null) 
                 	{
+                		if(currentLine.split(",").length < 2)
+    		    		{
+    		    			break;
+    		    		}
                 		if(currentLine.split(",")[1].equals(eaName.getText()))
                 		{
                 			eaDuplicateName = true;
@@ -1573,6 +1597,10 @@ public class PrototypeMain extends Application {
                 	
                 	while((currentLine = databaseReader.readLine()) != null) 
                 	{
+                		if(currentLine.split(",").length < 2)
+    		    		{
+    		    			break;
+    		    		}
                 		if(currentLine.split(",")[1].equals(defectName.getText()))
                 		{
                 			defectDuplicateName = true;
@@ -1765,13 +1793,21 @@ public class PrototypeMain extends Application {
 	                	String currentLine;
 	                	while((currentLine = databaseReader.readLine()) != null)
 	        			{
-	        				String projectName = currentLine.split(",")[0];
+	                		if(currentLine.split(",").length < 2)
+	    		    		{
+	    		    			break;
+	    		    		}
+	                		String projectName = currentLine.split(",")[0];
 	        				
 	        				BufferedReader databaseReader2 = new BufferedReader(new FileReader(effortFile));
 	        				int totalprojectEAs = 0;
 	        				String currentLine2;
 	        				while((currentLine2 = databaseReader2.readLine()) != null)
 	            			{
+	        					if(currentLine.split(",").length < 2)
+	        		    		{
+	        		    			break;
+	        		    		}
 	        					if(currentLine2.split(",")[2].equals(projectName))
 	        					{
 	        						totalprojectEAs++;
@@ -1784,6 +1820,10 @@ public class PrototypeMain extends Application {
 	        				String currentLine3;
 	        				while((currentLine3 = databaseReader3.readLine()) != null)
 	            			{
+	        					if(currentLine.split(",").length < 2)
+	        		    		{
+	        		    			break;
+	        		    		}
 	        					if(currentLine3.split(",")[2].equals(projectName)) //CHANGE 2 CHECK
 	        					{
 	        						totalprojectDefects++;
@@ -1889,6 +1929,10 @@ public class PrototypeMain extends Application {
                 	// Checks if the given project name has already been used
                 	while((currentLine = databaseReader.readLine()) != null) 
                 	{
+                		if(currentLine.split(",").length < 2)
+    		    		{
+    		    			break;
+    		    		}
                 		if(currentLine.split(",")[0].equals(projectName.getText()))
                 		{
                 			projectName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
