@@ -1,6 +1,6 @@
 # logger
 
-In order to run this program, import all files as a Java project, configure the build path and run configuration as needed, and run the PrototypeMain.java file.
+In order to run this program, import the ZIP file as an exisiting project into the workspace, configure the build path and the run configuration VM arguments as needed, and run the PrototypeMain.java file.
 Once the program is running, enter credentials and press Sign Up to create a new account, or use one of the test accounts provided.
 
 Test accounts:
