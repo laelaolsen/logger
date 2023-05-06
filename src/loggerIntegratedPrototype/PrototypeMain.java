@@ -1,6 +1,7 @@
 package loggerIntegratedPrototype;
 
 import javafx.application.Application;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -40,6 +41,8 @@ import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import java.sql.*;
+
 /**
  * <p> Title: Logger Integrated Prototype. </p>
  * <p> Description: This file contains all of the code for the Logger application
@@ -50,12 +53,14 @@ import javax.crypto.spec.SecretKeySpec;
 public class PrototypeMain extends Application {
 	
 	// Database files
-	File credentialFile = new File("src\\credential_database");
-    File effortFile = new File("src\\effort_database");
-    File defectFile = new File("src\\defect_database");
-    File reportFile = new File("src\\report_database");
-    File projectFile = new File("src\\project_database");
     File secretKeyFile = new File("src\\secretKey");
+    
+    // SQL setup
+    String url = "jdbc:mysql://localhost:3306/logger-database";
+	String username = "root";
+	String password = "MyN3wP4ssw0rd";
+	Connection con;
+
 	
 	// Helper functions ------------------------------------------
     
@@ -80,9 +85,6 @@ public class PrototypeMain extends Application {
 	{
 		ObservableList<GridPane> eaList = FXCollections.observableArrayList();
 		try {
-    		String currentLine;
-    		BufferedReader databaseReader = new BufferedReader(new FileReader(effortFile));
-  		
     		GridPane eaListHeaders = null;
             
     		// Horizontal distance between ListView elements
@@ -125,49 +127,37 @@ public class PrototypeMain extends Application {
         	eaList.add(eaListHeaders);
     		
     		// Adds each effort activity from the database to the ListView
-        	while((currentLine = databaseReader.readLine()) != null) 
-        	{	
-        		if(currentLine.split(",").length < 2)
-	    		{
-	    			break;
-	    		}
+        	ResultSet allEAs = con.createStatement().executeQuery("SELECT * FROM effortactivities");
+			
+	    	while(allEAs.next() == true) 
+	    	{
         		// Checks that the current effort activity belongs to the current user
-        		if(currentLine.split(",")[0].equals(currentUsername))
+        		if(allEAs.getString(1).equals(currentUsername))
 	        	{
     				GridPane GridPaneToAdd = new GridPane();
 	        		GridPaneToAdd.setHgap(50);
 	        		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
 	        		
-	        		Label effortNameLabel = new Label(currentLine.split(",")[1]);
+	        		Label effortNameLabel = new Label(allEAs.getString(2));
 	        		effortNameLabel.setMinWidth(minWidth);
 	        		
-	        		Label effortProjectNameLabel = new Label(currentLine.split(",")[2]);
+	        		Label effortProjectNameLabel = new Label(allEAs.getString(3));
 	        		effortProjectNameLabel.setMinWidth(minWidth);
 	        		
-	        		Label effortLCSLabel = new Label(currentLine.split(",")[3]);
+	        		Label effortLCSLabel = new Label(allEAs.getString(4));
 	        		effortLCSLabel.setMinWidth(minWidth*2);
 	        		
-	        		Label effortECLabel = new Label(currentLine.split(",")[4]);
+	        		Label effortECLabel = new Label(allEAs.getString(5));
 	        		effortECLabel.setMinWidth(minWidth);
 	        		
-	        		Label effortStartLabel = new Label(currentLine.split(",")[5]);
+	        		Label effortStartLabel = new Label(allEAs.getString(6));
 	        		effortStartLabel.setMinWidth(minWidth);
 	        		
-	        		Label effortEndLabel = new Label(currentLine.split(",")[6]);
+	        		Label effortEndLabel = new Label(allEAs.getString(7));
 	        		effortEndLabel.setMinWidth(minWidth);
 	        		
-	        		Label effortDescriptionLabel;
-	        		// Checks if there is a description
-	        		if(currentLine.split(",").length > 7)
-    	        	{
-	        			effortDescriptionLabel = new Label(currentLine.split(",")[7]);
-    	        		effortDescriptionLabel.setMinWidth(minWidth);
-    	        	}
-    	        	else
-    	        	{
-    	        		effortDescriptionLabel = new Label("");
-    	        		effortDescriptionLabel.setMinWidth(minWidth);
-    	        	}
+	        		Label effortDescriptionLabel = new Label(allEAs.getString(8));
+	        		effortDescriptionLabel.setMinWidth(minWidth);
 	        		
 	        		GridPaneToAdd.getChildren().addAll(effortNameLabel, effortProjectNameLabel, effortLCSLabel, effortECLabel, effortStartLabel, effortEndLabel, effortDescriptionLabel);
 	        		GridPane.setConstraints(effortNameLabel, 0, 0);
@@ -180,11 +170,9 @@ public class PrototypeMain extends Application {
 	        		
 	        		eaList.add(GridPaneToAdd);
 	        	}
-        	}
-        	
-        	databaseReader.close();     	
+        	}   	
         }
-        catch(IOException e) {e.printStackTrace();}
+        catch(Exception e) {e.printStackTrace();}
 		return eaList;
 	}
 	
@@ -193,8 +181,6 @@ public class PrototypeMain extends Application {
 	{
 		ObservableList<GridPane> defectList = FXCollections.observableArrayList();
 		try {
-    		String currentLine;
-    		BufferedReader databaseReader = new BufferedReader(new FileReader(defectFile));
   		
     		GridPane defectListHeaders = null;
             
@@ -233,47 +219,36 @@ public class PrototypeMain extends Application {
         	defectListHeaders.getChildren().addAll(defectNameHeaderLabel, defectProjectNameHeaderLabel, defectLCSInitialHeaderLabel, defectLCSPostHeaderLabel, defectECHeaderLabel, defectDescriptionHeaderLabel);
         	defectList.add(defectListHeaders);
     		
-    		// Adds each effort activity from the database to the ListView
-        	while((currentLine = databaseReader.readLine()) != null) 
-        	{	
-        		if(currentLine.split(",").length < 2)
-	    		{
-	    			break;
-	    		}
+        	ResultSet allDefects = con.createStatement().executeQuery("SELECT * FROM defects");
+			
+	    	while(allDefects.next() == true) 
+	    	{
         		// Checks that the current effort activity belongs to the current user
-        		if(currentLine.split(",")[0].equals(currentUsername))
+        		if(allDefects.getString(1).equals(currentUsername))
 	        	{
     				GridPane GridPaneToAdd = new GridPane();
 	        		GridPaneToAdd.setHgap(50);
 	        		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
 	        		
-	        		Label defectNameLabel = new Label(currentLine.split(",")[1]);
+	        		Label defectNameLabel = new Label(allDefects.getString(2));
 	        		defectNameLabel.setMinWidth(minWidth);
 	        		
-	        		Label defectProjectNameLabel = new Label(currentLine.split(",")[2]);
+	        		Label defectProjectNameLabel = new Label(allDefects.getString(3));
 	        		defectProjectNameLabel.setMinWidth(minWidth);
 	        		
-	        		Label defectLCSInitialLabel = new Label(currentLine.split(",")[3]);
+	        		Label defectLCSInitialLabel = new Label(allDefects.getString(4));
 	        		defectLCSInitialLabel.setMinWidth(minWidth*2);
 	        		
-	        		Label defectLCSPostLabel = new Label(currentLine.split(",")[4]);
+	        		Label defectLCSPostLabel = new Label(allDefects.getString(5));
 	        		defectLCSPostLabel.setMinWidth(minWidth*2);
 	        		
-	        		Label defectECLabel = new Label(currentLine.split(",")[5]);
+	        		Label defectECLabel = new Label(allDefects.getString(6));
 	        		defectECLabel.setMinWidth(minWidth);
-	        		
-	        		Label defectDescriptionLabel;
-	        		// Checks if there is a description
-	        		if(currentLine.split(",").length > 6)
-    	        	{
-	        			defectDescriptionLabel = new Label(currentLine.split(",")[6]);
-    	        		defectDescriptionLabel.setMinWidth(minWidth);
-    	        	}
-    	        	else
-    	        	{
-    	        		defectDescriptionLabel = new Label("");
-    	        		defectDescriptionLabel.setMinWidth(minWidth);
-    	        	}
+
+
+	        		Label defectDescriptionLabel = new Label(allDefects.getString(7));
+	        		defectDescriptionLabel.setMinWidth(minWidth);
+
 	        		
 	        		GridPaneToAdd.getChildren().addAll(defectNameLabel, defectProjectNameLabel, defectLCSInitialLabel, defectLCSPostLabel, defectECLabel, defectDescriptionLabel);
 	        		GridPane.setConstraints(defectNameLabel, 0, 0);
@@ -285,11 +260,9 @@ public class PrototypeMain extends Application {
 	        		
 	        		defectList.add(GridPaneToAdd);
 	        	}
-        	}
-        	
-        	databaseReader.close();     	
+        	}   	
         }
-        catch(IOException e) {e.printStackTrace();}
+        catch(Exception e) {e.printStackTrace();}
 		return defectList;
 	}	
 	
@@ -298,9 +271,6 @@ public class PrototypeMain extends Application {
 		{
 			ObservableList<GridPane> reportList = FXCollections.observableArrayList();
 			try {
-				BufferedReader databaseReader = new BufferedReader(new FileReader(reportFile));
-				String currentLine;
-		    	
 				GridPane reportColumnHeaders = new GridPane();
 				reportColumnHeaders.setHgap(50);
 				reportColumnHeaders.setPadding(new Insets(5,5,5,5));
@@ -316,20 +286,18 @@ public class PrototypeMain extends Application {
 				GridPane.setConstraints(reportTimeGeneratedHeaderLabel, 2, 0);
 				reportList.add(reportColumnHeaders);
 				
-		    	while((currentLine = databaseReader.readLine()) != null) 
+				ResultSet allReports = con.createStatement().executeQuery("SELECT * FROM reports");
+				
+		    	while(allReports.next() == true) 
 		    	{
-		    		if(currentLine.split(",").length < 2)
-		    		{
-		    			break;
-		    		}
 		    		GridPane GridPaneToAdd = new GridPane();
 		    		GridPaneToAdd.setHgap(50);
 		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
-		    		Label reportNameLabel = new Label(currentLine.split(",")[0]);
+		    		Label reportNameLabel = new Label(allReports.getString(1));
 		    		reportNameLabel.setMinWidth(100);
-		    		Label reportDateGeneratedLabel = new Label(currentLine.split(",")[1]);
+		    		Label reportDateGeneratedLabel = new Label(allReports.getString(2));
 		    		reportDateGeneratedLabel.setMinWidth(100);
-		    		Label reportTimeGeneratedLabel = new Label(currentLine.split(",")[2]);
+		    		Label reportTimeGeneratedLabel = new Label(allReports.getString(3));
 		    		reportTimeGeneratedLabel.setMinWidth(100);
 		    		
 		    		GridPaneToAdd.getChildren().addAll(reportNameLabel, reportDateGeneratedLabel, reportTimeGeneratedLabel);
@@ -339,10 +307,8 @@ public class PrototypeMain extends Application {
 		    		
 		    		reportList.add(GridPaneToAdd);
 		    	}
-		    	
-		    	databaseReader.close();
 			}
-			catch(IOException e) {e.printStackTrace();}
+			catch(Exception e) {e.printStackTrace();}
 			return reportList;
 		
 		}
@@ -352,8 +318,6 @@ public class PrototypeMain extends Application {
 	{
 		ObservableList<GridPane> projectList = FXCollections.observableArrayList();
 		try {
-			BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-			String currentLine;
 	    	
 			GridPane projectColumnHeaders = new GridPane();
 	    	projectColumnHeaders.setHgap(50);
@@ -366,18 +330,16 @@ public class PrototypeMain extends Application {
 			GridPane.setConstraints(membersHeaderLabel, 1, 0);
 			projectList.add(projectColumnHeaders);
 			
-	    	while((currentLine = databaseReader.readLine()) != null) 
+			ResultSet allProjects = con.createStatement().executeQuery("SELECT * FROM projects");
+			
+	    	while(allProjects.next() == true) 
 	    	{
-	    		if(currentLine.split(",").length < 2)
-	    		{
-	    			break;
-	    		}
 	    		GridPane GridPaneToAdd = new GridPane();
 	    		GridPaneToAdd.setHgap(50);
 	    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
-	    		Label projectNameLabel = new Label(currentLine.split(",", 2)[0]);
+	    		Label projectNameLabel = new Label(allProjects.getString(1));
 	    		projectNameLabel.setMinWidth(100);
-	    		Label membersLabel = new Label(currentLine.split(",", 2)[1]);
+	    		Label membersLabel = new Label(allProjects.getString(2));
 	    		GridPaneToAdd.getChildren().addAll(projectNameLabel, membersLabel);
 	    		GridPane.setConstraints(projectNameLabel, 0, 0);
 	    		GridPane.setConstraints(membersLabel, 1, 0);
@@ -385,9 +347,8 @@ public class PrototypeMain extends Application {
 	    		projectList.add(GridPaneToAdd);
 	    	}
 	    	
-	    	databaseReader.close();
 		}
-		catch(IOException e) {e.printStackTrace();}
+		catch(Exception e) {e.printStackTrace();}
 		return projectList;
 	
 	}
@@ -397,8 +358,6 @@ public class PrototypeMain extends Application {
 		{
 			ObservableList<GridPane> accountList = FXCollections.observableArrayList();
 			try {
-				BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));
-				String currentLine;
 		    	
 				GridPane accountColumnHeaders = new GridPane();
 				accountColumnHeaders.setHgap(50);
@@ -411,18 +370,17 @@ public class PrototypeMain extends Application {
 				GridPane.setConstraints(accountTypeHeaderLabel, 1, 0);
 				accountList.add(accountColumnHeaders);
 				
-		    	while((currentLine = databaseReader.readLine()) != null) 
+				ResultSet allAccounts = con.createStatement().executeQuery("SELECT * FROM accounts");
+				
+		    	while(allAccounts.next() == true) 
 		    	{
-		    		if(currentLine.split(",").length < 2)
-		    		{
-		    			break;
-		    		}
+
 		    		GridPane GridPaneToAdd = new GridPane();
 		    		GridPaneToAdd.setHgap(50);
 		    		GridPaneToAdd.setPadding(new Insets(5,5,5,5));
-		    		Label accountNameLabel = new Label(currentLine.split(",", 3)[0]);
+		    		Label accountNameLabel = new Label(allAccounts.getString(1));
 		    		accountNameLabel.setMinWidth(100);
-		    		Label accountTypeLabel = new Label(currentLine.split(",", 3)[2]);
+		    		Label accountTypeLabel = new Label(allAccounts.getString(3));
 		    		GridPaneToAdd.getChildren().addAll(accountNameLabel, accountTypeLabel);
 		    		GridPane.setConstraints(accountNameLabel, 0, 0);
 		    		GridPane.setConstraints(accountTypeLabel, 1, 0);
@@ -430,9 +388,9 @@ public class PrototypeMain extends Application {
 		    		accountList.add(GridPaneToAdd);
 		    	}
 		    	
-		    	databaseReader.close();
+
 			}
-			catch(IOException e) {e.printStackTrace();}
+			catch(Exception e) {e.printStackTrace();}
 			return accountList;
 		
 		}
@@ -456,6 +414,7 @@ public class PrototypeMain extends Application {
 	public void start(Stage primaryStage) throws Exception {
    
 		primaryStage.setTitle("Logger Integrated Prototype");
+		System.out.println("Application started");
 		
 		double screenWidth = 720;
 		double screenHeight = 540;
@@ -472,7 +431,21 @@ public class PrototypeMain extends Application {
         	key = databaseReader.readLine();
         	databaseReader.close();
         }
-        catch(IOException e) {e.printStackTrace();}
+        catch(Exception e) {e.printStackTrace();}
+        
+        // Checks that JDBC drivers are correct
+        try
+		{
+			Class.forName("com.mysql.cj.jdbc.Driver"); 
+			con = DriverManager.getConnection(url, username, password);
+			//con.createStatement().executeUpdate(insertQuery);
+			//String insertQuery = "INSERT INTO exampletable VALUES ('1', 'Olsen', 'Laela', 'Tempe');";
+			//ResultSet result2 = con.createStatement().executeQuery(query3);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 		// Log In Interface -------------------------------------------------------------
 		
@@ -640,16 +613,14 @@ public class PrototypeMain extends Application {
         eaProject.setMinWidth(100);
         
         // Reads the names of each project to populate the project ChoiceBox
-        String line;
         try
         {
-        	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-        	while ((line = databaseReader.readLine()) != null) {
-				eaProject.getItems().add(line.split(",")[0]);
+        	ResultSet allProjects = con.createStatement().executeQuery("SELECT * FROM projects");
+        	while (allProjects.next()) {
+				eaProject.getItems().add(allProjects.getString(1));
 			}
-        	databaseReader.close();
         }
-        catch(IOException e) {e.printStackTrace();}
+        catch(Exception e) {e.printStackTrace();}
         
         
         @SuppressWarnings("rawtypes")
@@ -739,15 +710,14 @@ public class PrototypeMain extends Application {
         defectProject.setMinWidth(100);
         
         // Generates the available projects for the projects drop down
-        String defectLine;
-        try {
-        	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-        	while ((defectLine = databaseReader.readLine()) != null) {
-        		defectProject.getItems().add(defectLine.split(",")[0]);
-        	}
-        	databaseReader.close();
+        try
+        {
+        	ResultSet allProjects = con.createStatement().executeQuery("SELECT * FROM projects");
+        	while (allProjects.next()) {
+				defectProject.getItems().add(allProjects.getString(1));
+			}
         }
-        catch(IOException e) {e.printStackTrace();}
+        catch(Exception e) {e.printStackTrace();}
         
         @SuppressWarnings("rawtypes")
 		ChoiceBox defectLCSInitial = new ChoiceBox();
@@ -893,28 +863,23 @@ public class PrototypeMain extends Application {
             		reportName.setText(((Label)newValue.getChildren().get(0)).getText());
             		try
                     {
-                    	BufferedReader databaseReader = new BufferedReader(new FileReader(reportFile));
-                    	String line;
-                    	while ((line = databaseReader.readLine()) != null) {
-    						
-                    		if(reportName.getText().equals(line.split(",")[0]))
-    						{
-    							String reportText = "Total Logger users: " + line.split(",")[3] + "\nTotal effort activities: " + line.split(",")[4] + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(line.split(",")[4])/ (double)Integer.parseInt(line.split(",")[3])) + "\nTotal defects: " + line.split(",")[5] + "\nAverage defects per employee: " + ((double) Integer.parseInt(line.split(",")[5])/ (double)Integer.parseInt(line.split(",")[3]));
-
-    							int count = 6;
-    							while(line.split(",").length > count)
-    		            		{
-    		            			reportText += "\n\n" + line.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line.split(",")[count+1] + "\nTotal defects: " + line.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line.split(",")[count+1])/ (double)Integer.parseInt(line.split(",")[count+2]));
-    		            			count += 3;
-    		            		}
-    		            		
-    		            		report.setText(reportText);
-    		            		reportName.setStyle("");
-    						}
-    					}
-                    	databaseReader.close();
+            			ResultSet duplicateReport = con.createStatement().executeQuery("SELECT * FROM reports WHERE ReportName='" + reportName.getText() + "'");
+            			
+                		if(duplicateReport.next())
+						{
+							String reportText = "Total Logger users: " + duplicateReport.getString(4) + "\nTotal effort activities: " + duplicateReport.getString(5) + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(duplicateReport.getString(5))/ (double)Integer.parseInt(duplicateReport.getString(4)) + "\nTotal defects: " + duplicateReport.getString(6) + "\nAverage defects per employee: " + ((double) Integer.parseInt(duplicateReport.getString(6))/ (double)Integer.parseInt(duplicateReport.getString(4))));
+							/*int count = 6;
+							while(line7.split(",").length > count)
+		            		{
+		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
+		            			count += 3;
+		            		}*/
+		            		
+		            		report.setText(reportText);
+		            		reportName.setStyle("");
+						}
                     }
-                    catch(IOException e) {e.printStackTrace();}
+                    catch(Exception e) {e.printStackTrace();}
             		
             	}
             	// Nothing is shown if the user selects nothing or selects the list headers
@@ -1064,7 +1029,7 @@ public class PrototypeMain extends Application {
         accountName = "";
         Button deleteAccount = new Button("Delete Account");;
         
-     // Changes the input fields when a project from the list is selected
+     // Changes the input fields when a account from the list is selected
         accountListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<GridPane>() {
             @Override
             public void changed(ObservableValue<? extends GridPane> observable, GridPane oldValue, GridPane newValue) {
@@ -1112,22 +1077,19 @@ public class PrototypeMain extends Application {
             public void handle(ActionEvent event) {
             	
             	boolean duplicateUsername = false;
-            	String line; // Holds one line from the credential database
                 
             	// Checks if the user-name is already taken
             	try
                 {
-                	BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));
-                	while ((line = databaseReader.readLine()) != null) {
-						if(usernameTextField.getText().equals(line.split(",")[0]))
-						{
-							duplicateUsername = true;
-							break;
-						}
-					}
-                	databaseReader.close();
+                	
+        			ResultSet duplicateAccounts = con.createStatement().executeQuery("SELECT * FROM accounts WHERE Username='" + usernameTextField.getText() + "'");
+
+					if(duplicateAccounts.next() == true)
+					{
+						duplicateUsername = true;
+					}	
                 }
-                catch(IOException e) {e.printStackTrace();}
+                catch(Exception e) {e.printStackTrace();}
             	
             	if(duplicateUsername)
                 {
@@ -1172,9 +1134,6 @@ public class PrototypeMain extends Application {
             		// Credentials are written to the database
             		try
             		{   		
-		
-            			BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(credentialFile, true));
-            			
             			// Password is encrypted
             			SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
             	        Cipher cipher = Cipher.getInstance(algorithm);
@@ -1186,11 +1145,8 @@ public class PrototypeMain extends Application {
             	        System.arraycopy(valueBytes, 0, paddedBytes, 0, valueBytes.length); 
             	        byte[] encryptedValue = cipher.doFinal(paddedBytes);
             	        String encryptedMessage = Base64.getEncoder().encodeToString(encryptedValue);
-            			
-            			
-            			databaseWriter.write(usernameTextField.getText() + "," + encryptedMessage + "," + currentUserType);
-            			databaseWriter.newLine();
-	            		databaseWriter.close();
+            	        
+            	        con.createStatement().executeUpdate("INSERT INTO accounts VALUES ('" + usernameTextField.getText() + "', '" + encryptedMessage + "', '" + currentUserType + "');");
             		}
             		catch(Exception e) {e.printStackTrace();}
             		
@@ -1211,35 +1167,51 @@ public class PrototypeMain extends Application {
         	@Override
             public void handle(ActionEvent event) {
         		boolean validUser = false;
-            	String line = null;
+        		String selectedUserType = "";
+
             	// Searches credential_database for the given credentials
             	try
                 {
-                	BufferedReader databaseReader = new BufferedReader(new FileReader(credentialFile));               	
-                	while ((line = databaseReader.readLine()) != null) {
-                		// Password is decrypted
-                		SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
-                        Cipher cipher = Cipher.getInstance(algorithm);
-                        cipher.init(Cipher.DECRYPT_MODE, keySpec);
-                        byte[] decodedValue = Base64.getDecoder().decode(line.split(",")[1]);
-                        byte[] decryptedValue = cipher.doFinal(decodedValue);
-                        String plainText = (new String(decryptedValue));
-                        plainText = plainText.trim();
-                        
-            		    if(usernameTextField.getText().equals(line.split(",")[0]) && 
-								passwordTextField.getText().equals(new String(plainText)) && 
-								(userTypeGroup.getSelectedToggle().equals(employeeSelect) && 
-								line.split(",")[2].equals("Employee") || 
-								userTypeGroup.getSelectedToggle().equals(managerSelect) && 
-								line.split(",")[2].equals("Manager") || 
-								userTypeGroup.getSelectedToggle().equals(sysAdminSelect) && 
-								line.split(",")[2].equals("System Administrator")))
+
+            		// Password is decrypted
+            		
+            		ResultSet matchingPassword = con.createStatement().executeQuery("SELECT EncryptedPassword FROM accounts WHERE Username='" + usernameTextField.getText() + "'");
+            		if(!matchingPassword.next())
+            		{
+            			validUser = false;
+            		}
+            		else
+            		{
+	            		SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), algorithm);
+	                    Cipher cipher = Cipher.getInstance(algorithm);
+	                    cipher.init(Cipher.DECRYPT_MODE, keySpec);
+	                    
+	                    byte[] decodedValue = Base64.getDecoder().decode(matchingPassword.getString("EncryptedPassword"));
+	                    byte[] decryptedValue = cipher.doFinal(decodedValue);
+	                    String plainText = (new String(decryptedValue));
+	                    plainText = plainText.trim();
+	                    
+	                    if(userTypeGroup.getSelectedToggle().equals(employeeSelect))
+	                    {
+	                    	selectedUserType = "Employee";
+	                    }
+	                    else if(userTypeGroup.getSelectedToggle().equals(managerSelect))
+	                    {
+	                    	selectedUserType = "Manager";
+	                    }
+	                    else
+	                    {
+	                    	selectedUserType = "System Administrator";
+	                    }
+	                    
+	                    ResultSet matchingCredentials = con.createStatement().executeQuery("SELECT * FROM accounts WHERE Username='" + usernameTextField.getText() + "' AND AccountType='" + selectedUserType + "'");
+	                    
+	        		    if(matchingCredentials.next() == true && plainText.equals(passwordTextField.getText()))
 						{
 							validUser = true;
-							break;
 						}
-					}
-                	databaseReader.close();
+            		}
+
                 }
                 catch(Exception e) {e.printStackTrace();}
             	
@@ -1271,11 +1243,11 @@ public class PrototypeMain extends Application {
             		optionSelectPane.getChildren().add(new Label("Access granted. Welcome, " + currentUserType + " " + currentUsername + "!"));
                     
     				// Determines the needed buttons based on the radio buttons from the primary scene
-    				if (line.split(",")[2].equals("Employee")) {
+    				if (selectedUserType.equals("Employee")) {
     					optionSelectPane.getChildren().addAll(effortActivities, defects, projects);
-    				} else if (line.split(",")[2].equals("Manager")) {
+    				} else if (selectedUserType.equals("Manager")) {
     					optionSelectPane.getChildren().addAll(effortActivities, defects, reports, projects);
-    				} else if (line.split(",")[2].equals("System Administrator")) {
+    				} else if (selectedUserType.equals("System Administrator")) {
     					optionSelectPane.getChildren().addAll(effortActivities, defects, reports, projects, accounts);
     				}
 
@@ -1320,17 +1292,15 @@ public class PrototypeMain extends Application {
         		eaListView.setItems(eaRefreshListView());
 	        	
 	        	// Refreshes the list of projects using the project_database
-        		String line;
 	        	eaProject.getItems().clear();
-	            try
+	        	try
 	            {
-	            	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-	            	while ((line = databaseReader.readLine()) != null) {
-	    				eaProject.getItems().add(line.split(",")[0]);
+	            	ResultSet allProjects = con.createStatement().executeQuery("SELECT * FROM projects");
+	            	while (allProjects.next()) {
+	    				eaProject.getItems().add(allProjects.getString(1));
 	    			}
-	            	databaseReader.close();
 	            }
-	            catch(IOException e) {e.printStackTrace();}
+	            catch(Exception e) {e.printStackTrace();}
 	        	primaryStage.setScene(eaScene);
         	}
         };
@@ -1398,20 +1368,13 @@ public class PrototypeMain extends Application {
 	        		boolean eaDuplicateName = false;
 	        		boolean eaInvalid = false;
 	        		
-	        		BufferedReader databaseReader = new BufferedReader(new FileReader(effortFile));
-                	String currentLine;
                 	// Checks whether to edit an activity (name already exists) or create a new effort effort
-                	while((currentLine = databaseReader.readLine()) != null) 
-                	{
-                		if(currentLine.split(",").length < 2)
-    		    		{
-    		    			break;
-    		    		}
-                		if(currentLine.split(",")[1].equals(eaName.getText()))
-                		{
-                			eaDuplicateName = true;
-                		}
-                	}
+                	ResultSet duplicateEA = con.createStatement().executeQuery("SELECT * FROM effortactivities WHERE ActivityName='" + eaName.getText() + "'");
+
+					if(duplicateEA.next() == true)
+					{
+            			eaDuplicateName = true;
+					}	
                 	// These if statements check if various input Nodes are blank
                 	// and set them to have a red outline if they are
                 	if(eaName.getText().equals(""))
@@ -1451,59 +1414,20 @@ public class PrototypeMain extends Application {
                 		eaEnd.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
                 		eaInvalid = true;
                 	}
-                	databaseReader.close();
                 	
 	    			// A new, valid, effort activity is created
                 	if(!eaDuplicateName && !eaInvalid)
-	        		{
-	    				BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(effortFile, true));
-	        			databaseWriter.write(currentUsername + "," +
-	        					eaName.getText() + "," + 
-	        					eaProject.getSelectionModel().getSelectedItem() + "," + 
-	        					eaLCS.getSelectionModel().getSelectedItem() + "," + 
-	        					eaEC.getSelectionModel().getSelectedItem() +  "," +
-	        					eaStart.getValue().toString() + "," +
-	        					eaEnd.getValue().toString() + "," +
-	        					eaDescription.getText());
-	        			databaseWriter.newLine();
-	            		databaseWriter.close();
+	        		{	
+	            		con.createStatement().executeUpdate("INSERT INTO effortactivities VALUES ('" + currentUsername + "', '" + eaName.getText() + "', '" + eaProject.getSelectionModel().getSelectedItem() + "', '" + eaLCS.getSelectionModel().getSelectedItem() + "', '" + eaEC.getSelectionModel().getSelectedItem() + "', '" + eaStart.getValue().toString() + "', '" + eaEnd.getValue().toString() + "', '" + eaDescription.getText() + "');");	            		
 	        		}
 	    			// The effort activity specified is edited
                 	else if(eaDuplicateName && !eaInvalid)
 	    			{
-	    				BufferedReader file = new BufferedReader(new FileReader(effortFile));
-		    	        StringBuffer inputBuffer = new StringBuffer();
-		    	        String line;
-	
-		    	        // Reads through effort_database and edits the correct entry
-		    	        while ((line = file.readLine()) != null) {
-		    	            if(line.split(",")[1].equals(eaName.getText()))
-		    	            {
-		    	            	inputBuffer.append(currentUsername + "," +
-			        					eaName.getText() + "," + 
-			        					eaProject.getSelectionModel().getSelectedItem() + "," + 
-			        					eaLCS.getSelectionModel().getSelectedItem() + "," + 
-			        					eaEC.getSelectionModel().getSelectedItem() +  "," +
-			        					eaStart.getValue().toString() + "," +
-			        					eaEnd.getValue().toString() + "," +
-			        					eaDescription.getText());
-		    	            }
-		    	            else
-	    	            	{
-		    	            	inputBuffer.append(line);
-	    	            	}
-		    	            inputBuffer.append('\n');
-		    	        }
-		    	        file.close();
-	
-		    	        FileOutputStream fileOut = new FileOutputStream(effortFile);
-		    	        fileOut.write(inputBuffer.toString().getBytes());
-		    	        fileOut.close();
-	
+		    	        con.createStatement().executeUpdate("UPDATE effortActivities SET ProjectName = '" + eaProject.getSelectionModel().getSelectedItem() + "', LifeCycleStep = '" + eaLCS.getSelectionModel().getSelectedItem() + "', EffortCategory = '" + eaEC.getSelectionModel().getSelectedItem() + "', DateStarted = '" + eaStart.getValue().toString() + "', DateCompleted = '" + eaEnd.getValue().toString() + "', ActivityDescription = '" + eaDescription.getText() + "' WHERE ActivityName = '" + eaName.getText() + "';");
 	    			}
  	
                 }
-                catch(IOException e) {e.printStackTrace();}
+                catch(Exception e) {e.printStackTrace();}
                 
 	    		// Refreshes the ListView based on effort_database to reflect the change
 	    		eaListView.setItems(eaRefreshListView());
@@ -1516,24 +1440,8 @@ public class PrototypeMain extends Application {
 	    	@Override
 	        public void handle(ActionEvent event) {
 	    		try {
-	    	        BufferedReader file = new BufferedReader(new FileReader(effortFile));
-	    	        StringBuffer inputBuffer = new StringBuffer();
-	    	        String line;
-
-	    	     // Reads through project_database and removes the given project
-	    	        while ((line = file.readLine()) != null) {
-	    	            if(!((line.split(",")[1].equals(eaName.getText())) && (line.split(",")[0].equals(currentUsername))))
-	    	            {
-	    	            	inputBuffer.append(line);
-	    	            	inputBuffer.append('\n');
-	    	            }
-	    	        }
-	    	        file.close();
-
-	    	        FileOutputStream fileOut = new FileOutputStream(effortFile);
-	    	        fileOut.write(inputBuffer.toString().getBytes());
-	    	        fileOut.close();
 	    	        
+	    	        con.createStatement().executeUpdate("DELETE FROM effortactivities WHERE ActivityName ='" + eaName.getText() + "' AND Username = '" + currentUsername + "';");
 	    	        eaListView.setItems(eaRefreshListView());
 	    	    } 
 	    		catch (Exception e) {e.printStackTrace();}
@@ -1557,18 +1465,15 @@ public class PrototypeMain extends Application {
                 defectListView.setItems(defectRefreshListView());
                 
                 // Refreshes the list of projects using the project_database
-                String line;
                 defectProject.getItems().clear();
-	            try
-	            {
-                    BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-                    while ((line = databaseReader.readLine()) != null) 
-                    {
-                    	defectProject.getItems().add(line.split(",")[0]);
-                    }
-                    databaseReader.close();
-	            }
-	            catch(IOException e) {e.printStackTrace();}
+                try
+                {
+                	ResultSet allProjects = con.createStatement().executeQuery("SELECT * FROM projects");
+                	while (allProjects.next()) {
+        				defectProject.getItems().add(allProjects.getString(1));
+        			}
+                }
+                catch(Exception e) {e.printStackTrace();}
 	                        
 	            primaryStage.setScene(dfScene);
         	}
@@ -1591,20 +1496,13 @@ public class PrototypeMain extends Application {
 	        		boolean defectDuplicateName = false;
 	        		boolean defectInvalid = false;
 	        		
-	        		BufferedReader databaseReader = new BufferedReader(new FileReader(defectFile));
-                	String currentLine;
                 	// Checks whether to edit an activity (name already exists) or create a new effort effort
                 	
-                	while((currentLine = databaseReader.readLine()) != null) 
+                	ResultSet duplicateDefect = con.createStatement().executeQuery("SELECT * FROM defects WHERE DefectName='" + defectName.getText() + "'");
+                	
+                	if(duplicateDefect.next())
                 	{
-                		if(currentLine.split(",").length < 2)
-    		    		{
-    		    			break;
-    		    		}
-                		if(currentLine.split(",")[1].equals(defectName.getText()))
-                		{
-                			defectDuplicateName = true;
-                		}
+                		defectDuplicateName = true;
                 	}
                 	
                 	// These if statements check if various input Nodes are blank
@@ -1635,57 +1533,21 @@ public class PrototypeMain extends Application {
                 		defectInvalid = true;
                 	}
                 	
-                	databaseReader.close();
-                	
 	    			// A new, valid, effort activity is created
                 	if(!defectDuplicateName && !defectInvalid)
-	        		{
-	    				BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(defectFile, true));
-	        			databaseWriter.write(currentUsername + "," +
-	        					defectName.getText() + "," + 
-	        					defectProject.getSelectionModel().getSelectedItem() + "," + 
-	        					defectLCSInitial.getSelectionModel().getSelectedItem() + "," + 
-	        					defectLCSPost.getSelectionModel().getSelectedItem() + "," +
-	        					defectEC.getSelectionModel().getSelectedItem() +  "," +
-	        					defectComment.getText());
-	        			databaseWriter.newLine();
-	            		databaseWriter.close();
+	        		{	
+	            		con.createStatement().executeUpdate("INSERT INTO defects VALUES ('" + currentUsername + "', '" + defectName.getText() + "', '" + defectProject.getSelectionModel().getSelectedItem() + "', '" + defectLCSInitial.getSelectionModel().getSelectedItem() + "', '" + defectLCSPost.getSelectionModel().getSelectedItem() + "', '" + defectEC.getSelectionModel().getSelectedItem() + "', '" + defectComment.getText() + "');");	            		
 	        		}
 	    			// The effort activity specified is edited
                 	else if(defectDuplicateName && !defectInvalid)
 	    			{
-	    				BufferedReader file = new BufferedReader(new FileReader(defectFile));
-		    	        StringBuffer inputBuffer = new StringBuffer();
-		    	        String line;
-	
-		    	        // Reads through effort_database and edits the correct entry
-		    	        while ((line = file.readLine()) != null) {
-		    	            if(line.split(",")[1].equals(defectName.getText()))
-		    	            {
-		    	            	inputBuffer.append(currentUsername + "," +
-			        					defectName.getText() + "," + 
-			        					defectProject.getSelectionModel().getSelectedItem() + "," + 
-			        					defectLCSInitial.getSelectionModel().getSelectedItem() + "," + 
-			        					defectLCSPost.getSelectionModel().getSelectedItem() + "," + 
-			        					defectEC.getSelectionModel().getSelectedItem() +  "," +
-			        					defectComment.getText());
-		    	            }
-		    	            else
-	    	            	{
-		    	            	inputBuffer.append(line);
-	    	            	}
-		    	            inputBuffer.append('\n');
-		    	        }
-		    	        file.close();
-	
-		    	        FileOutputStream fileOut = new FileOutputStream(defectFile);
-		    	        fileOut.write(inputBuffer.toString().getBytes());
-		    	        fileOut.close();
+		    	        
+		    	        con.createStatement().executeUpdate("UPDATE defects SET DefectProject = '" + defectProject.getSelectionModel().getSelectedItem() + "', LifeCycleStepInjected = '" + defectLCSInitial.getSelectionModel().getSelectedItem() + "', LifeCycleStepRemoved = '" + defectLCSPost.getSelectionModel().getSelectedItem() + "', DefectCategory = '" + defectEC.getSelectionModel().getSelectedItem() + "', DefectDescription = '" + defectComment.getText() + "' WHERE DefectName = '" + defectName.getText() + "';");
 	
 	    			}
  	
                 }
-                catch(IOException e) {e.printStackTrace();}
+                catch(Exception e) {e.printStackTrace();}
                 
 	    		// Refreshes the ListView based on effort_database to reflect the change
 	    		defectListView.setItems(defectRefreshListView());
@@ -1698,24 +1560,7 @@ public class PrototypeMain extends Application {
 	    	@Override
 	        public void handle(ActionEvent event) {
 	    		try {
-	    	        BufferedReader file = new BufferedReader(new FileReader(defectFile));
-	    	        StringBuffer inputBuffer = new StringBuffer();
-	    	        String defectLineCheck;
-
-	    	     // Reads through project_database and removes the given project
-	    	        while ((defectLineCheck = file.readLine()) != null) {
-	    	            if(!((defectLineCheck.split(",")[1].equals(defectName.getText()))))
-	    	            {
-	    	            	inputBuffer.append(defectLineCheck);
-	    	            	inputBuffer.append('\n');
-	    	            }
-	    	        }
-	    	        file.close();
-
-	    	        FileOutputStream fileOut = new FileOutputStream(defectFile);
-	    	        fileOut.write(inputBuffer.toString().getBytes());
-	    	        fileOut.close();
-	    	        
+	    	        con.createStatement().executeUpdate("DELETE FROM defects WHERE DefectName ='" + defectName.getText() + "' AND Username = '" + currentUsername + "';");    
 	    	        defectListView.setItems(defectRefreshListView());
 	    	    } 
 	    		catch (Exception e) {e.printStackTrace();}
@@ -1743,16 +1588,12 @@ public class PrototypeMain extends Application {
 	    		boolean duplicateReportName = false;
 	    		try
         		{ 	
-		    		BufferedReader databaseReader8 = new BufferedReader(new FileReader(reportFile));
-		    		String line8;
-		    		while((line8 = databaseReader8.readLine()) != null)
+		    		ResultSet duplicateReport = con.createStatement().executeQuery("SELECT * FROM reports WHERE ReportName='" + reportName.getText() + "'");
+		    		if(duplicateReport.next())
 		    		{
-		    			if(reportName.getText().equals(line8.split(",")[0]))
-		    			{
-		    				duplicateReportName = true;
-		    			}
+		    			duplicateReportName = true;
 		    		}
-		    		databaseReader8.close();
+
         		}
 	    		catch(Exception e) {e.printStackTrace();}
 	    		
@@ -1762,35 +1603,34 @@ public class PrototypeMain extends Application {
 	        		{   					
 		    			reportName.setStyle("");
 		    			
-		    			BufferedReader databaseReader4 = new BufferedReader(new FileReader(credentialFile));
+		    			ResultSet allAccounts = con.createStatement().executeQuery("SELECT * FROM accounts");
 		    			int totalUsers = 0;
-	    				while((databaseReader4.readLine()) != null)
+	    				while(allAccounts.next())
 	        			{
 	    					totalUsers++;
 	        			}
-	    				databaseReader4.close();
 	    				
-	    				BufferedReader databaseReader5 = new BufferedReader(new FileReader(effortFile));
+	    				ResultSet allEAs = con.createStatement().executeQuery("SELECT * FROM effortactivities");
 		    			int totalEAs = 0;
-	    				while((databaseReader5.readLine()) != null)
+	    				while(allEAs.next())
 	        			{
 	    					totalEAs++;
 	        			}
-	    				databaseReader5.close();
 	    				
-	    				BufferedReader databaseReader6 = new BufferedReader(new FileReader(defectFile));
+	    				ResultSet allDefects = con.createStatement().executeQuery("SELECT * FROM defects");
 		    			int totalDefects = 0;
-	    				while((databaseReader6.readLine()) != null)
+	    				while(allDefects.next())
 	        			{
 	    					totalDefects++;
 	        			}
-	    				databaseReader6.close();
 	
-	                	BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(reportFile, true));
-	        			databaseWriter.write(reportName.getText() + "," + java.time.LocalDate.now() + "," + java.time.LocalTime.now() + "," + totalUsers + "," + totalEAs + "," + totalDefects + ",");
-	        			
-	                	BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-	                	String currentLine;
+	                	con.createStatement().executeUpdate("INSERT INTO reports VALUES ('" + reportName.getText() + "', '" + java.time.LocalDate.now() + "', '" + java.time.LocalTime.now() + "', '" + totalUsers + "', '" + totalEAs + "', '" + totalDefects + "');");	            		
+
+	        			/*BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(reportFile, true));
+	        			BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
+	                	
+	        			String currentLine;
+	                	
 	                	while((currentLine = databaseReader.readLine()) != null)
 	        			{
 	                		if(currentLine.split(",").length < 2)
@@ -1836,31 +1676,30 @@ public class PrototypeMain extends Application {
 	                	databaseReader.close();
 	        			databaseWriter.newLine();
 	            		databaseWriter.close();
+	            		*/
 	                	reportListView.setItems(reportRefreshListView());
 
 	            		try
 	                    {
-	                    	BufferedReader databaseReader7 = new BufferedReader(new FileReader(reportFile));
-	                    	String line7;
-	                    	while ((line7 = databaseReader7.readLine()) != null) {
-	    						
-	                    		if(reportName.getText().equals(line7.split(",")[0]))
-	    						{
-	    							String reportText = "Total Logger users: " + line7.split(",")[3] + "\nTotal effort activities: " + line7.split(",")[4] + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(line7.split(",")[4])/ (double)Integer.parseInt(line7.split(",")[3])) + "\nTotal defects: " + line7.split(",")[5] + "\nAverage defects per employee: " + ((double) Integer.parseInt(line7.split(",")[5])/ (double)Integer.parseInt(line7.split(",")[3]));
-	    							int count = 6;
-	    							while(line7.split(",").length > count)
-	    		            		{
-	    		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
-	    		            			count += 3;
-	    		            		}
-	    		            		
-	    		            		report.setText(reportText);
-	    		            		reportName.setStyle("");
-	    						}
-	    					}
-	                    	databaseReader7.close();
+	                    	
+	                    	ResultSet duplicateReport = con.createStatement().executeQuery("SELECT * FROM reports WHERE ReportName='" + reportName.getText() + "'");
+	
+                    		if(duplicateReport.next())
+    						{
+    							String reportText = "Total Logger users: " + duplicateReport.getString(4) + "\nTotal effort activities: " + duplicateReport.getString(5) + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(duplicateReport.getString(5))/ (double)Integer.parseInt(duplicateReport.getString(4)) + "\nTotal defects: " + duplicateReport.getString(6) + "\nAverage defects per employee: " + ((double) Integer.parseInt(duplicateReport.getString(6))/ (double)Integer.parseInt(duplicateReport.getString(4))));
+    							/*int count = 6;
+    							while(line7.split(",").length > count)
+    		            		{
+    		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
+    		            			count += 3;
+    		            		}*/
+    		            		
+    		            		report.setText(reportText);
+    		            		reportName.setStyle("");
+    						}
+
 	                    }
-	                    catch(IOException e) {e.printStackTrace();}
+	                    catch(Exception e) {e.printStackTrace();}
 
 	        		}
 	        		catch(Exception e) {e.printStackTrace();}
@@ -1878,24 +1717,7 @@ public class PrototypeMain extends Application {
 	    	@Override
 	        public void handle(ActionEvent event) {
     			try {
-	    	        BufferedReader file = new BufferedReader(new FileReader(reportFile));
-	    	        StringBuffer inputBuffer = new StringBuffer();
-	    	        String line;
-
-	    	     // Reads through report_database and removes the given report
-	    	        while ((line = file.readLine()) != null) {
-	    	            if(!line.split(",")[0].equals(reportName.getText()))
-	    	            {
-	    	            	inputBuffer.append(line);
-	    	            	inputBuffer.append('\n');
-	    	            }
-	    	        }
-	    	        file.close();
-
-	    	        FileOutputStream fileOut = new FileOutputStream(reportFile);
-	    	        fileOut.write(inputBuffer.toString().getBytes());
-	    	        fileOut.close();
-	    	        
+	    	        con.createStatement().executeUpdate("DELETE FROM reports WHERE ReportName ='" + reportName.getText() + "';");    
 	    	        reportListView.setItems(reportRefreshListView());
 	    	    } 
 	    		catch (Exception e) {e.printStackTrace();}
@@ -1924,37 +1746,32 @@ public class PrototypeMain extends Application {
 	    			
 	    			boolean projectInvalidName = false;
 	        		
-	    			BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-                	String currentLine;
                 	// Checks if the given project name has already been used
-                	while((currentLine = databaseReader.readLine()) != null) 
-                	{
-                		if(currentLine.split(",").length < 2)
-    		    		{
-    		    			break;
-    		    		}
-                		if(currentLine.split(",")[0].equals(projectName.getText()))
-                		{
-                			projectName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
+                	try
+                    {
+                    	
+            			ResultSet duplicateProject = con.createStatement().executeQuery("SELECT * FROM projects WHERE ProjectName='" + projectName.getText() + "'");
+
+    					if(duplicateProject.next() == true)
+    					{
+    						projectName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
                 			projectInvalidName = true;
-                		}
-                	}
+    					}	
+                    }
+                    catch(Exception e) {e.printStackTrace();}
+
                 	// Checks if the given project name is blank
                 	if(projectName.getText().equals(""))
                 	{
                 		projectName.setStyle("-fx-effect: dropshadow(three-pass-box, tomato, 3, 0.8, 0, 0);");
                 		projectInvalidName = true;
                 	}
-                	databaseReader.close();
 	    			
                 	// Check if the project name is valid
                 	if(!projectInvalidName)
 	        		{
-	    				BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(projectFile, true));
-	        			databaseWriter.write(projectName.getText() + "," + projectMembers.getText());
-	        			databaseWriter.newLine();
-	            		databaseWriter.close();
 	            		
+	            		con.createStatement().executeUpdate("INSERT INTO projects VALUES ('" + projectName.getText() + "', '" + projectMembers.getText() + "');");	            		
 	            		projectListView.setItems(projectRefreshListView());
 	        		}
         		}
@@ -1971,27 +1788,8 @@ public class PrototypeMain extends Application {
 	    		if(!currentUserType.equals("Employee"))
 		    	{
 	    			try {
-		    	        BufferedReader file = new BufferedReader(new FileReader(projectFile));
-		    	        StringBuffer inputBuffer = new StringBuffer();
-		    	        String line;
-	
-		    	        // Reads through project_database and edits the given project
-		    	        while ((line = file.readLine()) != null) {
-		    	            if(line.split(",")[0].equals(projectName.getText()))
-		    	            {
-		    	            	inputBuffer.append(line.split(",")[0] + "," + projectMembers.getText());
-		    	            }
-		    	            else
-	    	            	{
-		    	            	inputBuffer.append(line);
-	    	            	}
-		    	            inputBuffer.append('\n');
-		    	        }
-		    	        file.close();
-	
-		    	        FileOutputStream fileOut = new FileOutputStream(projectFile);
-		    	        fileOut.write(inputBuffer.toString().getBytes());
-		    	        fileOut.close();
+		    	        
+		    	        con.createStatement().executeUpdate("UPDATE projects SET MemberList = '" + projectMembers.getText() + "' WHERE ProjectName = '" + projectName.getText() + "';");
 	            		
 		    	        projectListView.setItems(projectRefreshListView());
 		    	    } 
@@ -2007,25 +1805,8 @@ public class PrototypeMain extends Application {
 	        public void handle(ActionEvent event) {
 	    		if(!currentUserType.equals("Employee"))
 		    	{
-	    			try {
-		    	        BufferedReader file = new BufferedReader(new FileReader(projectFile));
-		    	        StringBuffer inputBuffer = new StringBuffer();
-		    	        String line;
-	
-		    	     // Reads through project_database and removes the given project
-		    	        while ((line = file.readLine()) != null) {
-		    	            if(!line.split(",")[0].equals(projectName.getText()))
-		    	            {
-		    	            	inputBuffer.append(line);
-		    	            	inputBuffer.append('\n');
-		    	            }
-		    	        }
-		    	        file.close();
-	
-		    	        FileOutputStream fileOut = new FileOutputStream(projectFile);
-		    	        fileOut.write(inputBuffer.toString().getBytes());
-		    	        fileOut.close();
-		    	        
+	    			try {    	        
+		    	        con.createStatement().executeUpdate("DELETE FROM projects WHERE ProjectName='" + projectName.getText() + "';");   	        
 		    	        projectListView.setItems(projectRefreshListView());
 		    	    } 
 		    		catch (Exception e) {e.printStackTrace();}
@@ -2054,50 +1835,14 @@ public class PrototypeMain extends Application {
 	    		
     			// Deletes the account from credentials_database
 	    		try {
-	    	        BufferedReader file = new BufferedReader(new FileReader(credentialFile));
-	    	        StringBuffer inputBuffer = new StringBuffer();
-	    	        String line;
-
-	    	     // Reads through credentials_database and removes the given account
-	    	        while ((line = file.readLine()) != null) {
-	    	            if((!line.split(",")[0].equals(accountName)))
-	    	            {
-	    	            	inputBuffer.append(line);
-	    	            	inputBuffer.append('\n');
-	    	            }
-	    	        }
-	    	        file.close();
-
-	    	        FileOutputStream fileOut = new FileOutputStream(credentialFile);
-	    	        fileOut.write(inputBuffer.toString().getBytes());
-	    	        fileOut.close();
+	    	        con.createStatement().executeUpdate("DELETE FROM accounts WHERE Username='" + accountName + "';");
+	    	        con.createStatement().executeUpdate("DELETE FROM effortactivities WHERE Username='" + accountName + "';");
+	    	        con.createStatement().executeUpdate("DELETE FROM defects WHERE Username='" + accountName + "';");
 	    	        
 	    	        accountListView.setItems(accountRefreshListView());
 	    	    } 
 	    		catch (Exception e) {e.printStackTrace();}
 	    		
-	    		// Deletes the account's effort activities from effort_database
-	    		try {
-	    	        BufferedReader file = new BufferedReader(new FileReader(effortFile));
-	    	        StringBuffer inputBuffer = new StringBuffer();
-	    	        String line;
-
-	    	        while ((line = file.readLine()) != null) {
-	    	            if((!line.split(",")[0].equals(accountName)))
-	    	            {
-	    	            	inputBuffer.append(line);
-	    	            	inputBuffer.append('\n');
-	    	            }
-	    	        }
-	    	        file.close();
-
-	    	        FileOutputStream fileOut = new FileOutputStream(effortFile);
-	    	        fileOut.write(inputBuffer.toString().getBytes());
-	    	        fileOut.close();
-	    	        
-	    	        eaListView.setItems(eaRefreshListView());
-	    	    } 
-	    		catch (Exception e) {e.printStackTrace();}
     		}
 	    	
 	    };
