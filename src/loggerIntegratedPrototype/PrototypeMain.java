@@ -414,7 +414,6 @@ public class PrototypeMain extends Application {
 	public void start(Stage primaryStage) throws Exception {
    
 		primaryStage.setTitle("Logger Integrated Prototype");
-		System.out.println("Application started");
 		
 		double screenWidth = 720;
 		double screenHeight = 540;
@@ -868,12 +867,6 @@ public class PrototypeMain extends Application {
                 		if(duplicateReport.next())
 						{
 							String reportText = "Total Logger users: " + duplicateReport.getString(4) + "\nTotal effort activities: " + duplicateReport.getString(5) + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(duplicateReport.getString(5))/ (double)Integer.parseInt(duplicateReport.getString(4)) + "\nTotal defects: " + duplicateReport.getString(6) + "\nAverage defects per employee: " + ((double) Integer.parseInt(duplicateReport.getString(6))/ (double)Integer.parseInt(duplicateReport.getString(4))));
-							/*int count = 6;
-							while(line7.split(",").length > count)
-		            		{
-		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
-		            			count += 3;
-		            		}*/
 		            		
 		            		report.setText(reportText);
 		            		reportName.setStyle("");
@@ -1626,57 +1619,6 @@ public class PrototypeMain extends Application {
 	
 	                	con.createStatement().executeUpdate("INSERT INTO reports VALUES ('" + reportName.getText() + "', '" + java.time.LocalDate.now() + "', '" + java.time.LocalTime.now() + "', '" + totalUsers + "', '" + totalEAs + "', '" + totalDefects + "');");	            		
 
-	        			/*BufferedWriter databaseWriter = new BufferedWriter(new FileWriter(reportFile, true));
-	        			BufferedReader databaseReader = new BufferedReader(new FileReader(projectFile));
-	                	
-	        			String currentLine;
-	                	
-	                	while((currentLine = databaseReader.readLine()) != null)
-	        			{
-	                		if(currentLine.split(",").length < 2)
-	    		    		{
-	    		    			break;
-	    		    		}
-	                		String projectName = currentLine.split(",")[0];
-	        				
-	        				BufferedReader databaseReader2 = new BufferedReader(new FileReader(effortFile));
-	        				int totalprojectEAs = 0;
-	        				String currentLine2;
-	        				while((currentLine2 = databaseReader2.readLine()) != null)
-	            			{
-	        					if(currentLine.split(",").length < 2)
-	        		    		{
-	        		    			break;
-	        		    		}
-	        					if(currentLine2.split(",")[2].equals(projectName))
-	        					{
-	        						totalprojectEAs++;
-	        					}
-	            			}
-	        				databaseReader2.close();
-	        				
-	        				BufferedReader databaseReader3 = new BufferedReader(new FileReader(defectFile));
-	        				int totalprojectDefects = 0;
-	        				String currentLine3;
-	        				while((currentLine3 = databaseReader3.readLine()) != null)
-	            			{
-	        					if(currentLine.split(",").length < 2)
-	        		    		{
-	        		    			break;
-	        		    		}
-	        					if(currentLine3.split(",")[2].equals(projectName)) //CHANGE 2 CHECK
-	        					{
-	        						totalprojectDefects++;
-	        					}
-	            			}
-	        				databaseReader3.close();
-	        				
-	        				databaseWriter.write(projectName + "," + totalprojectEAs + "," + totalprojectDefects + ",");
-	        			}
-	                	databaseReader.close();
-	        			databaseWriter.newLine();
-	            		databaseWriter.close();
-	            		*/
 	                	reportListView.setItems(reportRefreshListView());
 
 	            		try
@@ -1687,12 +1629,6 @@ public class PrototypeMain extends Application {
                     		if(duplicateReport.next())
     						{
     							String reportText = "Total Logger users: " + duplicateReport.getString(4) + "\nTotal effort activities: " + duplicateReport.getString(5) + "\nAverage effort activities per employee: " + ((double) Integer.parseInt(duplicateReport.getString(5))/ (double)Integer.parseInt(duplicateReport.getString(4)) + "\nTotal defects: " + duplicateReport.getString(6) + "\nAverage defects per employee: " + ((double) Integer.parseInt(duplicateReport.getString(6))/ (double)Integer.parseInt(duplicateReport.getString(4))));
-    							/*int count = 6;
-    							while(line7.split(",").length > count)
-    		            		{
-    		            			reportText += "\n\n" + line7.split(",")[count] + " statistics:" + "\nTotal effort activities: " +  line7.split(",")[count+1] + "\nTotal defects: " + line7.split(",")[count+2] + "\nEffort activity to defect ratio: " + ((double) Integer.parseInt(line7.split(",")[count+1])/ (double)Integer.parseInt(line7.split(",")[count+2]));
-    		            			count += 3;
-    		            		}*/
     		            		
     		            		report.setText(reportText);
     		            		reportName.setStyle("");
